@@ -22,13 +22,13 @@ button,input,select{font:inherit}button{border:0;border-radius:10px;padding:11px
 h2{font-size:17px;margin:0 0 12px}h3{font-size:14px;margin:0 0 8px}.muted{color:var(--muted);font-size:12px}.row{display:flex;align-items:center;justify-content:space-between;gap:8px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:9px}
 label{display:block;font-size:12px;color:var(--muted);margin:9px 0 5px}input,select{width:100%;padding:11px;border:1px solid #ccd5dd;border-radius:9px;background:white;color:var(--text);min-width:0}
 .formgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.formgrid>div{min-width:0}.formgrid input,.formgrid select{width:100%;min-width:0;font-size:14px;padding:10px 8px}.formgrid .wide{grid-column:1/-1}
-.calendar-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}.calendar{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}.dow{text-align:center;font-size:11px;color:var(--muted);padding:5px 0}.day{min-height:68px;background:#f7f9fa;border:1px solid var(--line);border-radius:8px;padding:5px 3px;text-align:left;color:var(--text);display:flex;flex-direction:column;gap:4px}.day.selected{border:2px solid var(--gold);padding:4px 2px}.day .num{font-size:11px}.day .amt{font-size:10px;font-weight:750;overflow-wrap:anywhere}.day .amt.positive{color:var(--green)!important}.day .amt.negative{color:var(--red)!important}.day .swapmark{font-size:9px;color:#2876b8;font-weight:700}.day .amt{font-size:9px}.day .amt.positive{color:var(--green)!important}.day .amt.negative{color:var(--red)!important}.day .mult{font-size:9px;color:#9b6b14}.day.empty{visibility:hidden}.positive{color:var(--green)!important}.negative{color:var(--red)!important}.big{font-size:25px;font-weight:800;color:var(--text)}
+.calendar-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}.calendar{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px}.dow{text-align:center;font-size:11px;color:var(--muted);padding:5px 0}.day{min-width:0;min-height:78px;background:#f7f9fa;border:1px solid var(--line);border-radius:9px;padding:7px 5px;text-align:left;color:var(--text);display:flex;flex-direction:column;gap:5px}.day.selected{border:2px solid var(--gold);padding:4px 2px}.day .num{font-size:12px;font-weight:800}.day .amt{font-size:10px;font-weight:800;overflow-wrap:anywhere;line-height:1.25}.day .amt.positive{color:var(--green)!important}.day .amt.negative{color:var(--red)!important}.day .swapmark{font-size:9px;color:#2876b8;font-weight:750;line-height:1.2}.day .amt{font-size:10px}.day .amt.positive{color:var(--green)!important}.day .amt.negative{color:var(--red)!important}.day .mult{font-size:9px;color:#9b6b14}.day.empty{visibility:hidden}.positive{color:var(--green)!important}.negative{color:var(--red)!important}.big{font-size:25px;font-weight:800;color:var(--text)}
 table{width:100%;border-collapse:collapse;font-size:13px}td,th{padding:9px 4px;border-bottom:1px solid var(--line);text-align:right}td:first-child,th:first-child{text-align:left}
 .item{padding:10px 0;border-bottom:1px solid var(--line)}.item:last-child{border-bottom:0}
 .hidden{display:none!important}.pill{display:inline-block;padding:4px 7px;border-radius:20px;background:#eef2f5;font-size:10px;color:#405363}
 .notice{background:#fff8e9;border:1px solid #f1dfb9;padding:10px;border-radius:10px;font-size:12px;color:#6b5425}
 footer{text-align:center;color:#7b8791;font-size:11px;padding:10px}
-@media(min-width:600px){main{padding:20px}.day{min-height:82px}.day .amt{font-size:12px}}
+@media(min-width:600px){main{padding:20px}.calendar{gap:9px}.day{min-height:96px;padding:9px}.day .amt{font-size:13px}.day .num{font-size:14px}}
 </style>
 </head>
 <body>
@@ -189,6 +189,7 @@ function holding(b,p,s,d){
 function rateAt(b,p,s,d){let r=db.rates.filter(x=>x.broker===b&&x.pair===p&&x.side===s&&x.date<=d).sort((a,b)=>b.date.localeCompare(a.date))[0];return r?Number(r.value):0}
 function multiplier(p,d){let x=db.multipliers.find(x=>x.pair===p&&x.date===d);return x?x.days:1}
 function dailyPair(d,p,b=null){const actual=db.dailySwapActuals.find(x=>x.date===d&&x.pair===p);if(actual&&!b)return Number(actual.amount||0);return db.brokers.filter(x=>!b||x===b).reduce((sum,br)=>{const sideSum=['売り','買い'].reduce((v,s)=>v+(holding(br,p,s,d)/10000)*rateAt(br,p,s,d)*multiplier(p,d),0);return sum+sideSum;},0)}
+function forecastPairForDate(d,p){return db.brokers.reduce((sum,br)=>sum+['売り','買い'].reduce((v,side)=>v+(holding(br,p,side,d)/10000)*rateAt(br,p,side,d)*multiplier(p,d),0),0)}
 function daily(d,b=null){return db.pairs.reduce((a,p)=>a+dailyPair(d,p,b),0)}
 function dayPnl(d){return db.dailyPnl.filter(x=>x.date===d).reduce((a,x)=>a+Number(x.fx||0)+Number(x.fee||0)+Number(x.other||0),0)}
 function dayTotal(d){return daily(d)+dayPnl(d)}
@@ -228,13 +229,20 @@ function allNet(){let minDates=[...db.trades.map(x=>x.date),...db.rates.map(x=>x
 function setTab(name){document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('hidden',x.id!==name));document.querySelectorAll('nav button').forEach(x=>{let a=x.dataset.tab===name;x.classList.toggle('active',a);x.classList.toggle('secondary',!a)})}
 document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>setTab(b.dataset.tab));
 function renderCalendar(){
- let [y,m]=currentMonth.split('-').map(Number),first=new Date(y,m-1,1).getDay(),html=['日','月','火','水','木','金','土'].map(x=>`<div class="dow">${x}</div>`).join('');
- for(let i=0;i<first;i++)html+='<div class="day empty"></div>';
- for(let i=1;i<=daysIn(currentMonth);i++){let d=currentMonth+'-'+String(i).padStart(2,'0'),mult=db.multipliers.some(x=>x.date===d&&x.days!==1),v=dayTotal(d),cls=v<0?'negative':'positive',hasActual=db.dailySwapActuals.some(x=>x.date===d);html+=`<button class="day ${d===selectedDate?'selected':''}" data-date="${d}"><span class="num">${i}</span>${mult?`<span class="mult">付与設定</span>`:''}<span class="swapmark">SW ${Math.round(daily(d)).toLocaleString()}</span><span class="amt ${dayPnl(d)<0?'negative':'positive'}">損益 ${Math.round(dayPnl(d)).toLocaleString()}</span><span class="amt ${cls}">計 ${Math.round(v).toLocaleString()}</span>${hasActual?'<span class="swapmark">実績</span>':''}</button>`}
+ let [y,m]=currentMonth.split('-').map(Number);
+ // FX swap calendar: weekends are omitted to give weekdays more room.
+ let html=['月','火','水','木','金'].map(x=>`<div class="dow">${x}</div>`).join('');
+ for(let i=1;i<=daysIn(currentMonth);i++){
+  let d=currentMonth+'-'+String(i).padStart(2,'0'),weekday=new Date(y,m-1,i).getDay();
+  if(weekday===0||weekday===6)continue;
+  let mult=db.multipliers.some(x=>x.date===d&&x.days!==1),v=dayTotal(d),cls=v<0?'negative':'positive',hasActual=db.dailySwapActuals.some(x=>x.date===d);
+  html+=`<button class="day ${d===selectedDate?'selected':''}" data-date="${d}"><span class="num">${i}日</span>${mult?`<span class="mult">付与設定</span>`:''}<span class="swapmark">SW ${Math.round(daily(d)).toLocaleString()}</span><span class="amt ${dayPnl(d)<0?'negative':'positive'}">損益 ${Math.round(dayPnl(d)).toLocaleString()}</span><span class="amt ${cls}">計 ${Math.round(v).toLocaleString()}</span>${hasActual?'<span class="swapmark">実績</span>':''}</button>`;
+ }
  $('calendarGrid').innerHTML=html;document.querySelectorAll('.day[data-date]').forEach(b=>b.onclick=()=>{selectedDate=b.dataset.date;render()});
- $('monthTitle').textContent=`${y}年 ${m}月`;let total=dayTotal(selectedDate);$('selectedTitle').textContent=selectedDate+' の内訳';$('selectedTotal').textContent=money(total);$('selectedTotal').className='big '+(total>=0?'positive':'negative');
- $('selectedBreakdown').innerHTML=db.pairs.map(p=>{let a=db.dailySwapActuals.find(x=>x.date===selectedDate&&x.pair===p);return `<div class="item row"><span>${esc(p)} <small class="muted">(${multiplier(p,selectedDate)}日${a?'・実績':''})</small></span><strong class="${dailyPair(selectedDate,p)<0?'negative':'positive'}">${money(dailyPair(selectedDate,p))}</strong></div>`}).join('')+`<div class="item row"><span>その他損益（為替差損益・手数料等）</span><strong class="${dayPnl(selectedDate)<0?'negative':'positive'}">${money(dayPnl(selectedDate))}</strong></div>`;
- let actual=db.dailySwapActuals.find(x=>x.date===selectedDate&&x.pair===$('actualSwapPair').value)||db.dailySwapActuals.find(x=>x.date===selectedDate);$('actualSwapPair').value=actual?.pair||db.pairs[0];$('actualSwapAmount').value=actual?actual.amount:' ';let pnl=db.dailyPnl.find(x=>x.date===selectedDate)||{};$('dayFx').value=pnl.fx??'';$('dayFee').value=pnl.fee??'';$('dayOther').value=pnl.other??'';$('dayMemo').value=pnl.memo||'';
+ $('monthTitle').textContent=`${y}年 ${m}月（平日）`;
+ let total=dayTotal(selectedDate);$('selectedTitle').textContent=selectedDate+' の内訳';$('selectedTotal').textContent=money(total);$('selectedTotal').className='big '+(total>=0?'positive':'negative');
+ $('selectedBreakdown').innerHTML=db.pairs.map(p=>{let a=db.dailySwapActuals.find(x=>x.date===selectedDate&&x.pair===p),forecast=forecastPairForDate(selectedDate,p),shown=a?Number(a.amount||0):forecast,diff=a?Number(a.amount||0)-forecast:null;return `<div class="item"><div class="row"><span>${esc(p)} <small class="muted">(${multiplier(p,selectedDate)}日${a?'・実績':''})</small></span><strong class="${shown<0?'negative':'positive'}">${money(shown)}</strong></div><small class="muted">予測 ${money(forecast)}${a?` ／ 実績 ${money(a.amount)} ／ 差額 <b class="${diff<0?'negative':'positive'}">${money(diff)}</b>`:''}</small></div>`}).join('')+`<div class="item row"><span>その他損益（為替差損益・手数料等）</span><strong class="${dayPnl(selectedDate)<0?'negative':'positive'}">${money(dayPnl(selectedDate))}</strong></div>`;
+ let actual=db.dailySwapActuals.find(x=>x.date===selectedDate&&x.pair===$('actualSwapPair').value)||db.dailySwapActuals.find(x=>x.date===selectedDate);$('actualSwapPair').value=actual?.pair||db.pairs[0];$('actualSwapAmount').value=actual?actual.amount:'';let pnl=db.dailyPnl.find(x=>x.date===selectedDate)||{};$('dayFx').value=pnl.fx??'';$('dayFee').value=pnl.fee??'';$('dayOther').value=pnl.other??'';$('dayMemo').value=pnl.memo||'';
  $('multiplier').value=String(multiplier(db.pairs[0],selectedDate));$('multPair').value=db.pairs[0];
 }
 function renderPositions(){
@@ -277,7 +285,7 @@ function forecastRange(start,end){
 }
 function currentDailyForecast(){
  const d=today();let total=0;
- for(const b of db.brokers)for(const p of db.pairs)for(const side of ['売り','買い'])total+=(holding(b,p,side,d)/10000)*rateAt(b,p,side,d);
+ for(const b of db.brokers)for(const p of db.pairs)for(const side of ['売り','買い'])total+=(holding(b,p,side,d)/10000)*rateAt(b,p,side,d)*multiplier(p,d);
  return total;
 }
 function renderSwapForecast(){
