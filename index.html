@@ -15,13 +15,13 @@
 header{background:var(--navy);color:white;padding:calc(16px + env(safe-area-inset-top)) 16px 18px;position:sticky;top:0;z-index:5}
 .brand{display:flex;align-items:center;justify-content:space-between;font-weight:800;letter-spacing:.06em}.brand span{color:var(--gold)}.hero-label{font-size:12px;color:#c5d0d9;margin-top:16px}.hero-total{font-size:30px;font-weight:800;margin:3px 0 12px}
 .stats{display:grid;grid-template-columns:1fr 1fr;gap:8px}.stat{background:#263e50;padding:10px;border-radius:12px}.stat small{display:block;color:#c5d0d9;font-size:11px}.stat strong{font-size:17px}
-nav{display:flex;gap:6px;padding:12px;background:var(--card);position:sticky;top:140px;z-index:4;border-bottom:1px solid var(--line)}nav button{flex:1}
+nav{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;padding:10px;background:var(--card);position:sticky;top:140px;z-index:4;border-bottom:1px solid var(--line)}nav button{min-width:0;padding:10px 4px;font-size:12px}
 main{max-width:760px;margin:auto;padding:12px}
 button,input,select{font:inherit}button{border:0;border-radius:10px;padding:11px 12px;background:var(--navy);color:white;font-weight:650;cursor:pointer}button.secondary{background:#e9eef2;color:#243746}button.danger{background:#fff0f0;color:var(--red)}button.active{background:var(--gold);color:#17212b}
 .card{background:var(--card);border:1px solid var(--line);border-radius:15px;padding:14px;margin:0 0 12px;box-shadow:0 2px 8px #142a3c08}
 h2{font-size:17px;margin:0 0 12px}h3{font-size:14px;margin:0 0 8px}.muted{color:var(--muted);font-size:12px}.row{display:flex;align-items:center;justify-content:space-between;gap:8px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:9px}
 label{display:block;font-size:12px;color:var(--muted);margin:9px 0 5px}input,select{width:100%;padding:11px;border:1px solid #ccd5dd;border-radius:9px;background:white;color:var(--text);min-width:0}
-.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.formgrid .wide{grid-column:1/-1}
+.formgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.formgrid>div{min-width:0}.formgrid input,.formgrid select{width:100%;min-width:0;font-size:14px;padding:10px 8px}.formgrid .wide{grid-column:1/-1}
 .calendar-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}.calendar{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}.dow{text-align:center;font-size:11px;color:var(--muted);padding:5px 0}.day{min-height:68px;background:#f7f9fa;border:1px solid var(--line);border-radius:8px;padding:5px 3px;text-align:left;color:var(--text);display:flex;flex-direction:column;gap:4px}.day.selected{border:2px solid var(--gold);padding:4px 2px}.day .num{font-size:11px}.day .amt{font-size:10px;font-weight:750;color:var(--green);overflow-wrap:anywhere}.day .mult{font-size:9px;color:#9b6b14}.day.empty{visibility:hidden}.positive{color:var(--green)}.negative{color:var(--red)}.big{font-size:25px;font-weight:800}
 table{width:100%;border-collapse:collapse;font-size:13px}td,th{padding:9px 4px;border-bottom:1px solid var(--line);text-align:right}td:first-child,th:first-child{text-align:left}
 .item{padding:10px 0;border-bottom:1px solid var(--line)}.item:last-child{border-bottom:0}
@@ -64,7 +64,7 @@ footer{text-align:center;color:#7b8791;font-size:11px;padding:10px}
   <div class="formgrid">
    <div><label>FX会社</label><select id="tradeBroker"></select></div><div><label>通貨ペア</label><select id="tradePair"></select></div>
    <div><label>売買</label><select id="tradeSide"><option>売り</option><option>買い</option></select></div><div><label>取引区分</label><select id="tradeAction"><option>新規</option><option>決済</option></select></div>
-   <div><label>取引日</label><input type="date" id="tradeDate"></div><div><label>数量（通貨）</label><input type="number" id="tradeQty" min="1" step="1" placeholder="例：20000"></div>
+   <div><label>取引日</label><input type="date" id="tradeDate"></div><div><label>数量（通貨・1ロット＝1,000通貨）</label><input type="number" id="tradeQty" min="1" step="1" placeholder="例：20000"></div>
   </div>
   <button id="addTrade" style="width:100%;margin-top:12px">取引を登録</button><div id="tradeError" class="muted"></div>
  </div>
@@ -89,14 +89,14 @@ footer{text-align:center;color:#7b8791;font-size:11px;padding:10px}
 </section>
 <section id="analysis" class="tab hidden">
  <div class="card"><h2>集計期間</h2><div class="formgrid"><div><label>年</label><select id="analysisYear"></select></div><div><label>集計</label><select id="analysisPeriod"><option value="month">月別</option><option value="year">年間</option><option value="all">通算</option></select></div></div></div>
- <div class="card"><h2>損益サマリー</h2><div id="summary"></div></div>
+ <div class="card"><h2>スワップ見込み（現在の保有数量・登録単価ベース）</h2><div id="swapForecast"></div><div class="muted">現在の建玉数量と、登録済みの売買別スワップ単価から試算します。単価未登録の建玉は見込みに含まれません。将来の単価変更・為替会社の付与日変更は反映されない概算です。</div></div><div class="card"><h2>損益サマリー</h2><div id="summary"></div></div>
  <div class="card"><h2>通貨ペア別</h2><div id="pairAnalysis"></div></div>
  <div class="card"><h2>FX会社別</h2><div id="brokerAnalysis"></div></div>
  <div class="card"><h2>月別スワップ・実現損益</h2><div id="monthAnalysis"></div></div>
 </section>
 <section id="settings" class="tab hidden">
  <div class="card">
-  <h2>FX会社の管理</h2><div class="formgrid"><div class="wide"><label>会社名を追加</label><input id="newBroker" placeholder="例：外為どっとコム"></div></div><button id="addBroker" style="margin-top:10px">FX会社を追加</button><div id="brokerList" style="margin-top:10px"></div>
+  <h2>FX会社・口座の管理</h2><div class="muted">会社ごと、また同じ会社内の複数口座も登録できます。口座ごとに異なる名前を付けてください。例：ヒロセ通商（メイン）、ヒロセ通商（サブ）、外為どっとコム（口座A）。取引・スワップ単価・証拠金は登録名ごとに分けて管理します。</div><div class="formgrid"><div class="wide"><label>FX会社・口座名</label><input id="newBroker" placeholder="例：ヒロセ通商（サブ口座）"></div></div><button id="addBroker" style="margin-top:10px">口座を追加</button><div id="brokerList" style="margin-top:10px"></div>
  </div>
  <div class="card">
   <h2>スワップ単価の登録</h2><div class="muted">1万通貨あたり・1付与日分。売り・買い別に登録し、適用開始日以降に適用します。受取はプラス、支払いはマイナス。</div>
@@ -105,6 +105,35 @@ footer{text-align:center;color:#7b8791;font-size:11px;padding:10px}
    <div><label>売買</label><select id="rateSide"><option>売り</option><option>買い</option></select></div><div><label>適用開始日</label><input type="date" id="rateDate"></div>
    <div class="wide"><label>単価（円／1万通貨・1付与日）</label><input type="number" id="rateValue" step="1" placeholder="例：1680"></div>
   </div><button id="addRate" style="width:100%;margin-top:10px">単価を登録</button><div id="rateHistory"></div>
+ </div>
+ <div class="card">
+  <h2>現在レートの更新（手動）</h2>
+  <div class="muted">レートは口座画面などで確認して手入力します。現時点では自動取得・FX会社とのAPI接続はありません。</div>
+  <div class="formgrid">
+   <div><label>通貨ペア</label><select id="quotePair"></select></div>
+   <div><label>現在レート</label><input type="number" id="quoteValue" step="0.000001" placeholder="例：61.4194"></div>
+   <div class="wide"><label>取得元・メモ</label><input id="quoteSource" placeholder="例：ヒロセ通商"></div>
+  </div>
+  <button id="saveQuote" style="width:100%;margin-top:10px">レートを更新</button><div id="quoteHistory"></div>
+ </div>
+ <div class="card">
+  <h2>証拠金管理（口座表示＋手入力）</h2>
+  <div class="muted">ヒロセ通商の口座表示を基準値として登録しています。各項目は口座画面に合わせて更新できます。</div>
+  <div class="formgrid">
+   <div><label>預託証拠金（円）</label><input type="number" id="marginDeposit"></div>
+   <div><label>有効証拠金（円）</label><input type="number" id="marginEquity"></div>
+   <div><label>必要証拠金（円）</label><input type="number" id="marginRequired"></div>
+   <div><label>発注証拠金（円）</label><input type="number" id="marginOrder"></div>
+   <div><label>評価損益（円）</label><input type="number" id="marginFloating"></div>
+   <div><label>レバレッジ（口座表示）</label><input type="number" id="marginLeverage" step="0.01"></div>
+  </div>
+  <div class="grid2" style="margin-top:10px">
+   <div class="stat"><small>自動計算・証拠金維持率</small><strong id="marginRatio">—</strong></div>
+   <div class="stat"><small>必要証拠金控除後（発注証拠金除く）</small><strong id="marginAvailable">—</strong></div>
+  </div>
+  <div class="muted" id="marginCheck" style="margin-top:8px"></div>
+  <button id="saveMargin" style="width:100%;margin-top:10px">証拠金情報を保存</button>
+  <small class="muted">基準データ：2026/11/09 21:12。実際の発注可否は必ずFX会社の画面で確認してください。</small>
  </div>
  <div class="card">
   <h2>通貨ペアの管理</h2><div class="formgrid"><div class="wide"><label>通貨ペアを追加</label><input id="newPair" placeholder="例：USD/TRY"></div></div><button id="addPair" style="margin-top:10px">通貨ペアを追加</button><div id="pairList" style="margin-top:10px"></div>
@@ -121,16 +150,33 @@ footer{text-align:center;color:#7b8791;font-size:11px;padding:10px}
 <footer>SWAP CALENDAR · ローカル保存型</footer>
 </main>
 <script>
-const KEY='swap-calendar-v1';
+const KEY='swap-calendar-v3';
 const today=()=>new Date().toLocaleDateString('en-CA');
-const initial=()=>({brokers:['ヒロセ通商'],pairs:['CHF/TRY','EUR/TRY','TRY/JPY','GBP/TRY','USD/TRY'],trades:[],rates:[],multipliers:[],settlements:[]});
+const initial=()=>({
+ brokers:['ヒロセ通商'],
+ pairs:['CHF/TRY','EUR/TRY','USD/TRY','TRY/JPY','MXN/JPY','ZAR/JPY','CHF/MXN','CHF/ZAR','USD/JPY','EUR/USD'],
+ trades:[],rates:[],multipliers:[],settlements:[],
+ // Initial balance snapshot: quantities are actual currency units; 1 lot = 1,000 units at Hirose.
+ openingPositions:[
+  {broker:'ヒロセ通商',pair:'EUR/TRY',side:'売り',qty:8000,avg:56.2027,date:'2026-11-09',openingSwap:0},
+  {broker:'ヒロセ通商',pair:'CHF/TRY',side:'売り',qty:42000,avg:60.5648,date:'2026-11-09',openingSwap:56039}
+ ],
+ quotes:[
+  {pair:'EUR/TRY',value:56.2276,source:'ヒロセ通商画面・手入力',updated:'2026/11/09 21:17'},
+  {pair:'CHF/TRY',value:61.4194,source:'ヒロセ通商画面・手入力',updated:'2026/11/09 21:17'}
+ ],
+ margin:{deposit:975592,equity:916996,required:384400,order:112800,floating:-58596,positionPnl:-114635,unrealizedSwap:56039,available:419796,leverage:10.37,asOf:'2026/11/09 21:12'}
+});
 let db=load(), currentMonth=today().slice(0,7), selectedDate=today();
-function load(){try{return {...initial(),...JSON.parse(localStorage.getItem(KEY)||'{}')}}catch{return initial()}}
+function load(){try{const fresh=localStorage.getItem(KEY);const legacy=fresh?null:localStorage.getItem('swap-calendar-v1');const old=JSON.parse(fresh||legacy||'{}');let d={...initial(),...old};d.brokers=[...new Set([...initial().brokers,...(d.brokers||[])])];d.pairs=[...new Set([...initial().pairs,...(d.pairs||[])])];d.trades=d.trades||[];d.rates=d.rates||[];d.multipliers=d.multipliers||[];d.settlements=d.settlements||[];d.quotes=d.quotes||initial().quotes;d.openingPositions=d.openingPositions||initial().openingPositions;d.margin={...initial().margin,...(d.margin||{})};if(legacy&&!fresh){localStorage.setItem(KEY,JSON.stringify(d));}return d}catch{return initial()}}
 function save(){localStorage.setItem(KEY,JSON.stringify(db));render()}
 const $=id=>document.getElementById(id), money=n=>'¥'+Math.round(n||0).toLocaleString('ja-JP'), esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function opts(id,arr,keep=true){let old=$(id).value;$(id).innerHTML=arr.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('');if(keep&&arr.includes(old))$(id).value=old}
-function initSelects(){['tradeBroker','settleBroker','rateBroker'].forEach(id=>opts(id,db.brokers));['tradePair','settlePair','ratePair','multPair'].forEach(id=>opts(id,db.pairs))}
-function holding(b,p,s,d){return db.trades.filter(t=>t.broker===b&&t.pair===p&&t.side===s&&t.date<=d).reduce((a,t)=>a+(t.action==='新規'?t.qty:-t.qty),0)}
+function initSelects(){['tradeBroker','settleBroker','rateBroker'].forEach(id=>opts(id,db.brokers));['tradePair','settlePair','ratePair','multPair','quotePair'].forEach(id=>opts(id,db.pairs))}
+function holding(b,p,s,d){
+ const base=db.openingPositions.filter(x=>x.broker===b&&x.pair===p&&x.side===s&&x.date<=d).reduce((a,x)=>a+x.qty,0);
+ return base+db.trades.filter(t=>t.broker===b&&t.pair===p&&t.side===s&&t.date<=d).reduce((a,t)=>a+(t.action==='新規'?t.qty:-t.qty),0)
+}
 function rateAt(b,p,s,d){let r=db.rates.filter(x=>x.broker===b&&x.pair===p&&x.side===s&&x.date<=d).sort((a,b)=>b.date.localeCompare(a.date))[0];return r?Number(r.value):0}
 function multiplier(p,d){let x=db.multipliers.find(x=>x.pair===p&&x.date===d);return x?x.days:1}
 function dailyPair(d,p,b=null){return db.brokers.filter(x=>!b||x===b).reduce((sum,br)=>{const sideSum=['売り','買い'].reduce((v,s)=>v+(holding(br,p,s,d)/10000)*rateAt(br,p,s,d)*multiplier(p,d),0);return sum+sideSum;},0)}
@@ -155,7 +201,15 @@ function renderCalendar(){
  $('multiplier').value=String(multiplier(db.pairs[0],selectedDate));$('multPair').value=db.pairs[0];
 }
 function renderPositions(){
- let html='';for(let b of db.brokers)for(let p of db.pairs)for(let s of ['売り','買い']){let q=holding(b,p,s,selectedDate);if(q>0)html+=`<div class="item row"><span>${esc(b)} · ${esc(p)} · ${s}</span><strong>${q.toLocaleString()}通貨</strong></div>`}
+ let html='';
+ for(let b of db.brokers)for(let p of db.pairs)for(let s of ['売り','買い']){
+  let q=holding(b,p,s,selectedDate);if(q<=0)continue;
+  const base=db.openingPositions.filter(x=>x.broker===b&&x.pair===p&&x.side===s&&x.date<=selectedDate);
+  const baseQty=base.reduce((a,x)=>a+x.qty,0);
+  const avg=baseQty?base.reduce((a,x)=>a+x.qty*x.avg,0)/baseQty:null;
+  const sw=base.reduce((a,x)=>a+Number(x.openingSwap||0),0);
+  html+=`<div class="item"><div class="row"><span>${esc(b)} · ${esc(p)} · ${s}</span><strong>${q.toLocaleString()}通貨（${(q/1000).toLocaleString()}ロット）</strong></div><small class="muted">初期平均レート ${avg===null?'—':avg.toFixed(4)} · 初期累積スワップ ${money(sw)}</small></div>`;
+ }
  $('positions').innerHTML=html||'<p class="muted">選択日現在の保有建玉はありません。</p>';
 }
 function renderHistories(){
@@ -163,6 +217,43 @@ function renderHistories(){
  $('settlementHistory').innerHTML=[...db.settlements].sort((a,b)=>b.date.localeCompare(a.date)).map(t=>`<div class="item"><div class="row"><b>${esc(t.pair)} ${esc(t.broker)}</b><strong class="${t.net>=0?'positive':'negative'}">${money(t.net)}</strong></div><small class="muted">${esc(t.date)} · ${t.qty.toLocaleString()}通貨</small><div class="muted">為替 ${money(t.fx)} + スワップ ${money(t.swap)}</div>${t.memo?`<small>${esc(t.memo)}</small>`:''}<button class="danger" data-del-settle="${t.id}" style="margin-top:6px">削除</button></div>`).join('')||'<p class="muted">決済履歴はありません。</p>';
  document.querySelectorAll('[data-del-trade]').forEach(b=>b.onclick=()=>{if(confirm('この取引履歴を削除しますか？保有数量と予測も変わります。')){db.trades=db.trades.filter(x=>String(x.id)!==b.dataset.delTrade);save()}});
  document.querySelectorAll('[data-del-settle]').forEach(b=>b.onclick=()=>{if(confirm('この決済履歴を削除しますか？')){db.settlements=db.settlements.filter(x=>String(x.id)!==b.dataset.delSettle);save()}});
+}
+function forecastCreditDays(pair,start,end){
+ let total=0,dt=new Date(start+'T12:00:00'),stop=new Date(end+'T12:00:00');
+ for(;dt<=stop;dt.setDate(dt.getDate()+1)){
+  const d=dt.toLocaleDateString('en-CA'),weekday=dt.getDay();
+  // Default: weekdays accrue one credit day; weekends accrue none. Explicit broker/pair multiplier overrides this estimate.
+  const override=db.multipliers.find(x=>x.pair===pair&&x.date===d);
+  total+=override?Number(override.days):(weekday===0||weekday===6?0:1);
+ }
+ return total;
+}
+function forecastRange(start,end){
+ let total=0;
+ for(const b of db.brokers)for(const p of db.pairs)for(const side of ['売り','買い']){
+  const qty=holding(b,p,side,today()),unit=rateAt(b,p,side,today());
+  if(qty)total+=(qty/10000)*unit*forecastCreditDays(p,start,end);
+ }
+ return total;
+}
+function currentDailyForecast(){
+ const d=today();let total=0;
+ for(const b of db.brokers)for(const p of db.pairs)for(const side of ['売り','買い'])total+=(holding(b,p,side,d)/10000)*rateAt(b,p,side,d);
+ return total;
+}
+function renderSwapForecast(){
+ const todayDate=today(),monthStart=currentMonth+'-01',monthEnd=currentMonth+'-'+String(daysIn(currentMonth)).padStart(2,'0');
+ const monthEstimate=forecastRange(monthStart,monthEnd);
+ const yearEnd=new Date(new Date(todayDate+'T12:00:00').getTime()+364*86400000).toLocaleDateString('en-CA');
+ const yearEstimate=forecastRange(todayDate,yearEnd);
+ const dailyEstimate=currentDailyForecast();
+ const details=[];
+ for(const b of db.brokers)for(const p of db.pairs)for(const side of ['売り','買い']){
+  const qty=holding(b,p,side,todayDate); if(!qty) continue;
+  const unit=rateAt(b,p,side,todayDate);
+  details.push(`<div class="item row"><span>${esc(b)} · ${esc(p)} · ${side}<br><small class="muted">${qty.toLocaleString()}通貨 / 単価 ${money(unit)}／1万通貨・1付与日</small></span><b>${money(qty/10000*unit)} / 付与日</b></div>`);
+ }
+ $('swapForecast').innerHTML=`<div class="grid2"><div class="stat"><small>1付与日あたり</small><strong>${money(dailyEstimate)}</strong></div><div class="stat"><small>選択月の見込み（平日・設定倍率反映）</small><strong>${money(monthEstimate)}</strong></div><div class="stat"><small>今後365日見込み（平日・設定倍率反映）</small><strong>${money(yearEstimate)}</strong></div></div><p class="muted">月間は選択月全体、年間は今日から365日を試算。土日は原則0日、登録済みの付与日倍率は反映します。祝日・臨時変更・将来の単価変更は未反映の概算です。</p><h3 style="margin-top:14px">口座・通貨ペア別の内訳</h3>${details.join('')||'<p class="muted">保有建玉がありません。</p>'}`;
 }
 function renderAnalysis(){
  let y=Number($('analysisYear').value||new Date().getFullYear()),period=$('analysisPeriod').value;
@@ -180,13 +271,20 @@ function renderSettings(){
  $('brokerList').innerHTML=db.brokers.map(b=>`<div class="item row"><span>${esc(b)}</span><small class="muted">登録済み</small></div>`).join('');
  $('pairList').innerHTML=db.pairs.map(p=>`<div class="item row"><span>${esc(p)}</span><small class="muted">登録済み</small></div>`).join('');
  $('rateHistory').innerHTML='<h3 style="margin-top:14px">登録済み単価</h3>'+[...db.rates].sort((a,b)=>b.date.localeCompare(a.date)).map(r=>`<div class="item row"><span>${esc(r.broker)} · ${esc(r.pair)} · ${r.side}<br><small class="muted">${r.date}以降</small></span><b>${money(r.value)}</b></div>`).join('');
+ $('quoteHistory').innerHTML='<h3 style="margin-top:14px">現在の登録レート</h3>'+db.quotes.map(q=>`<div class="item row"><span>${esc(q.pair)}<br><small class="muted">${esc(q.source||'手動入力')} · ${esc(q.updated)}</small></span><b>${Number(q.value).toLocaleString('ja-JP',{maximumFractionDigits:6})}</b></div>`).join('')||'<p class="muted">レート未登録</p>';
+ $('marginDeposit').value=db.margin.deposit??0;$('marginEquity').value=db.margin.equity??0;$('marginRequired').value=db.margin.required??0;$('marginOrder').value=db.margin.order??0;$('marginFloating').value=db.margin.floating??0;$('marginLeverage').value=db.margin.leverage??25;
+ const ratio=Number(db.margin.required)>0?Number(db.margin.equity)/Number(db.margin.required)*100:null;
+ $('marginRatio').textContent=ratio===null?'—':ratio.toFixed(2)+'%';
+ $('marginAvailable').textContent=money(Number(db.margin.equity||0)-Number(db.margin.required||0)-Number(db.margin.order||0));
+ const equityCheck=Number(db.margin.deposit||0)+Number(db.margin.floating||0);
+ $('marginCheck').textContent=`照合：預託証拠金＋評価損益＝${money(equityCheck)}（口座有効証拠金 ${money(db.margin.equity)}）／差額 ${money(Number(db.margin.equity||0)-equityCheck)}。`;
 }
 function render(){
  initSelects();renderCalendar();renderPositions();renderHistories();renderSettings();
  $('heroMonth').textContent=money(monthDays(currentMonth).reduce((a,d)=>a+daily(d),0));
  $('heroYear').textContent=money(yearNet(Number(currentMonth.slice(0,4))));
  $('heroPositions').textContent=db.brokers.reduce((a,b)=>a+db.pairs.reduce((v,p)=>v+['売り','買い'].filter(s=>holding(b,p,s,today())>0).length,0),0)+'件';
- renderAnalysis();$('settlePreview').textContent=money(Number($('fxPnl').value||0)+Number($('settleSwap').value||0));
+ renderSwapForecast();renderAnalysis();$('settlePreview').textContent=money(Number($('fxPnl').value||0)+Number($('settleSwap').value||0));
 }
 $('prevMonth').onclick=()=>{let d=new Date(currentMonth+'-01T12:00:00');d.setMonth(d.getMonth()-1);currentMonth=d.toLocaleDateString('en-CA').slice(0,7);selectedDate=currentMonth+'-01';render()};
 $('nextMonth').onclick=()=>{let d=new Date(currentMonth+'-01T12:00:00');d.setMonth(d.getMonth()+1);currentMonth=d.toLocaleDateString('en-CA').slice(0,7);selectedDate=currentMonth+'-01';render()};
@@ -196,8 +294,14 @@ function updateSettlePreview(){$('settlePreview').textContent=money(Number($('fx
 ['fxPnl','settleSwap'].forEach(id=>$(id).oninput=updateSettlePreview);
 $('addSettlement').onclick=()=>{let s={id:Date.now(),broker:$('settleBroker').value,pair:$('settlePair').value,side:$('settleSide').value,date:$('settleDate').value,qty:Number($('settleQty').value),fx:Number($('fxPnl').value),swap:Number($('settleSwap').value),memo:$('settleMemo').value};let q=holding(s.broker,s.pair,s.side,s.date);if(!s.date||!s.qty||s.qty<=0||s.qty>q){$('settleError').textContent=`決済数量を確認してください。該当建玉の保有数量は ${q.toLocaleString()}通貨です。`;return}if(!Number.isFinite(s.fx)||!Number.isFinite(s.swap)){$('settleError').textContent='損益金額を確認してください。';return}let t={id:Date.now()+1,broker:s.broker,pair:s.pair,side:s.side,action:'決済',date:s.date,qty:s.qty};db.trades.push(t);s.net=s.fx+s.swap;db.settlements.push(s);$('settleError').textContent='決済履歴と保有数量を更新しました。';$('settleQty').value='';$('fxPnl').value='';$('settleSwap').value='';save()};
 $('addRate').onclick=()=>{let r={broker:$('rateBroker').value,pair:$('ratePair').value,side:$('rateSide').value,date:$('rateDate').value,value:Number($('rateValue').value)};if(!r.date||$('rateValue').value.trim()===''||!Number.isFinite(r.value))return alert('日付と単価を入力してください。');db.rates=db.rates.filter(x=>!(x.broker===r.broker&&x.pair===r.pair&&x.side===r.side&&x.date===r.date));db.rates.push(r);save()};
-$('addBroker').onclick=()=>{let v=$('newBroker').value.trim();if(v&&!db.brokers.includes(v)){db.brokers.push(v);$('newBroker').value='';save()}};
+$('addBroker').onclick=()=>{let v=$('newBroker').value.trim();if(v&&!db.brokers.includes(v)){db.brokers.push(v);$('newBroker').value='';save()}else if(db.brokers.includes(v)){alert('同じ口座名が登録済みです。メイン・サブなど区別できる名前にしてください。')}};
 $('addPair').onclick=()=>{let v=$('newPair').value.trim().toUpperCase();if(v&&!db.pairs.includes(v)){db.pairs.push(v);$('newPair').value='';save()}};
+$('saveQuote').onclick=()=>{let pair=$('quotePair').value,value=Number($('quoteValue').value),source=$('quoteSource').value.trim();if(!pair||!$('quoteValue').value.trim()||!Number.isFinite(value)||value<=0){alert('通貨ペアと正しいレートを入力してください。');return}let updated=new Date().toLocaleString('ja-JP');db.quotes=db.quotes.filter(q=>q.pair!==pair);db.quotes.push({pair,value,source,updated});$('quoteValue').value='';save()};
+$('saveMargin').onclick=()=>{
+ let deposit=Number($('marginDeposit').value||0),equity=Number($('marginEquity').value||0),required=Number($('marginRequired').value||0),order=Number($('marginOrder').value||0),floating=Number($('marginFloating').value||0),leverage=Number($('marginLeverage').value||25);
+ if([deposit,equity,required,order,floating,leverage].some(x=>!Number.isFinite(x))||[deposit,equity,required,order,leverage].some(x=>x<0)||leverage<=0){alert('証拠金・レバレッジの入力値を確認してください。');return}
+ db.margin={...db.margin,deposit,equity,required,order,floating,leverage,asOf:new Date().toLocaleString('ja-JP')};save()
+};
 $('analysisYear').innerHTML=Array.from({length:11},(_,i)=>new Date().getFullYear()-5+i).map(y=>`<option>${y}</option>`).join('');$('analysisYear').value=new Date().getFullYear();
 $('analysisYear').onchange=renderAnalysis;$('analysisPeriod').onchange=renderAnalysis;
 $('exportData').onclick=()=>download('swap-calendar-backup-'+today()+'.json',JSON.stringify(db,null,2),'application/json');

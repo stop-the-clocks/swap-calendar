@@ -1,17 +1,1 @@
-{
-  "name": "SWAP CALENDAR",
-  "short_name": "SWAP CAL",
-  "start_url": "./index.html",
-  "display": "standalone",
-  "background_color": "#f3f5f7",
-  "theme_color": "#142a3c",
-  "lang": "ja",
-  "icons": [
-    {
-      "src": "icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
-    }
-  ]
-}
+{"name":"SWAP CALENDAR","short_name":"SWAP","start_url":"./","display":"standalone","background_color":"#f3f5f7","theme_color":"#142a3c","icons":[{"src":"icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]}
