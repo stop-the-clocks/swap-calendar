@@ -8,34 +8,37 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="SWAP CALENDAR">
 <link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <title>SWAP CALENDAR</title>
 <style>
 :root{--navy:#142a3c;--gold:#d9ad57;--bg:#f3f5f7;--card:#fff;--text:#17212b;--muted:#687785;--green:#16845b;--red:#c44747;--line:#e1e6eb}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;padding-bottom:calc(24px + env(safe-area-inset-bottom))}
-header{background:var(--navy);color:white;padding:calc(16px + env(safe-area-inset-top)) 16px 18px;position:sticky;top:0;z-index:5}
+header{background:var(--navy);color:white;padding:calc(16px + env(safe-area-inset-top)) 16px 18px}
 .brand{display:flex;align-items:center;justify-content:space-between;font-weight:800;letter-spacing:.06em}.brand span{color:var(--gold)}.hero-label{font-size:12px;color:#c5d0d9;margin-top:16px}.hero-total{font-size:30px;font-weight:800;margin:3px 0 12px}
 .stats{display:grid;grid-template-columns:1fr 1fr;gap:8px}.stat{background:#263e50;padding:10px;border-radius:12px}.stat small{display:block;color:#e0e8ef;font-size:11px;font-weight:650}.stat strong{display:block;font-size:17px;color:#fff;line-height:1.35;font-weight:800}
-nav{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;padding:10px;background:var(--card);position:sticky;top:140px;z-index:4;border-bottom:1px solid var(--line)}nav button{min-width:0;padding:10px 4px;font-size:12px}
+nav{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;padding:10px;padding-top:calc(10px + env(safe-area-inset-top));background:var(--card);position:sticky;top:0;z-index:5;border-bottom:1px solid var(--line)}nav button{min-width:0;padding:10px 4px;font-size:12px}
 main{max-width:760px;margin:auto;padding:12px}
 button,input,select{font:inherit}button{border:0;border-radius:10px;padding:11px 12px;background:var(--navy);color:white;font-weight:650;cursor:pointer}button.secondary{background:#e9eef2;color:#243746}button.danger{background:#fff0f0;color:var(--red)}button.active{background:var(--gold);color:#17212b}
 .card{background:var(--card);border:1px solid var(--line);border-radius:15px;padding:14px;margin:0 0 12px;box-shadow:0 2px 8px #142a3c08}
 h2{font-size:17px;margin:0 0 12px}h3{font-size:14px;margin:0 0 8px}.muted{color:var(--muted);font-size:12px}.row{display:flex;align-items:center;justify-content:space-between;gap:8px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:9px}
 label{display:block;font-size:12px;color:var(--muted);margin:9px 0 5px}input,select{width:100%;padding:11px;border:1px solid #ccd5dd;border-radius:9px;background:white;color:var(--text);min-width:0}
-.formgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.formgrid>div{min-width:0}.formgrid input,.formgrid select{width:100%;min-width:0;font-size:14px;padding:10px 8px}.formgrid .wide{grid-column:1/-1}
-.calendar-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}.calendar{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px}.dow{text-align:center;font-size:11px;color:var(--muted);padding:5px 0}.day{min-width:0;min-height:78px;background:#f7f9fa;border:1px solid var(--line);border-radius:9px;padding:7px 5px;text-align:left;color:var(--text);display:flex;flex-direction:column;gap:5px}.day.selected{border:2px solid var(--gold);padding:4px 2px}.day .num{font-size:12px;font-weight:800}.day .amt{font-size:10px;font-weight:800;overflow-wrap:anywhere;line-height:1.25}.day .amt.positive{color:var(--green)!important}.day .amt.negative{color:var(--red)!important}.day .swapmark{font-size:9px;color:#2876b8;font-weight:750;line-height:1.2}.day .amt{font-size:10px}.day .amt.positive{color:var(--green)!important}.day .amt.negative{color:var(--red)!important}.day .mult{font-size:9px;color:#9b6b14}.day.empty{visibility:hidden}.positive{color:var(--green)!important}.negative{color:var(--red)!important}.big{font-size:25px;font-weight:800;color:var(--text)}
+.formgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.formgrid>div{min-width:0}.formgrid input,.formgrid select{width:100%;min-width:0;font-size:16px;padding:10px 8px}.formgrid .wide{grid-column:1/-1}
+.calendar-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}.calendar{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px}.dow{text-align:center;font-size:11px;color:var(--muted);padding:5px 0}.day{min-height:68px;background:#f7f9fa;border:1px solid var(--line);border-radius:8px;padding:5px 3px;text-align:left;color:var(--text);display:flex;flex-direction:column;gap:4px}.day.selected{border:2px solid var(--gold);padding:4px 2px}.day .num{font-size:11px}.day .amt{font-size:10px;font-weight:750;overflow-wrap:anywhere}.swap-color{color:var(--gold)!important}.fx-color{color:#3988d8!important}.other-color{color:#8b70c8!important}.day .mult{font-size:9px;color:#9b6b14}.day.empty{visibility:hidden}.positive{color:var(--green)!important}.negative{color:var(--red)!important}.big{font-size:25px;font-weight:800;color:var(--text)}
 table{width:100%;border-collapse:collapse;font-size:13px}td,th{padding:9px 4px;border-bottom:1px solid var(--line);text-align:right}td:first-child,th:first-child{text-align:left}
 .item{padding:10px 0;border-bottom:1px solid var(--line)}.item:last-child{border-bottom:0}
 .hidden{display:none!important}.pill{display:inline-block;padding:4px 7px;border-radius:20px;background:#eef2f5;font-size:10px;color:#405363}
 .notice{background:#fff8e9;border:1px solid #f1dfb9;padding:10px;border-radius:10px;font-size:12px;color:#6b5425}
 footer{text-align:center;color:#7b8791;font-size:11px;padding:10px}
-@media(min-width:600px){main{padding:20px}.calendar{gap:9px}.day{min-height:96px;padding:9px}.day .amt{font-size:13px}.day .num{font-size:14px}}
+button{touch-action:manipulation}.day{min-height:74px}.day .amt{font-size:11px}
+@media(min-width:600px){main{padding:20px}.day{min-height:82px}.day .amt{font-size:12px}}
 </style>
 </head>
 <body>
 <header>
  <div class="brand">◈ <span>SWAP</span> CALENDAR <span class="pill">PERSONAL</span></div>
- <div class="hero-label">今月のスワップ予測・実績</div><div class="hero-total" id="heroMonth">¥0</div>
- <div class="stats"><div class="stat"><small>今年の実現＋未決済損益</small><strong id="heroYear">¥0</strong></div><div class="stat"><small>現在の保有建玉</small><strong id="heroPositions">0件</strong></div></div>
+ <div class="hero-label" id="heroLabel">今月の実績損益</div><div class="hero-total" id="heroMonth">¥0</div>
+ <div class="stats"><div class="stat"><small>今年の実績損益</small><strong id="heroYear">¥0</strong></div><div class="stat"><small>現在の保有建玉</small><strong id="heroPositions">0件</strong></div><div class="stat" style="grid-column:1/-1"><small>月末見込み（実績＋残日予測）</small><strong id="heroForecast">¥0</strong></div></div>
 </header>
 <nav>
  <button class="active" data-tab="calendar">カレンダー</button><button class="secondary" data-tab="trades">取引</button><button class="secondary" data-tab="analysis">集計</button><button class="secondary" data-tab="settings">設定</button>
@@ -45,26 +48,30 @@ footer{text-align:center;color:#7b8791;font-size:11px;padding:10px}
  <div class="card">
   <div class="calendar-head"><button class="secondary" id="prevMonth">‹</button><strong id="monthTitle"></strong><button class="secondary" id="nextMonth">›</button></div>
   <div class="calendar" id="calendarGrid"></div>
+  <div id="weekendNote" class="muted" style="margin-top:8px"></div>
   <div class="muted" style="margin-top:8px">日付をタップすると、その日の付与日数と内訳を編集できます。</div>
  </div>
  <div class="card">
   <h2 id="selectedTitle">選択日の内訳</h2>
   <div class="big positive" id="selectedTotal">¥0</div>
   <div id="selectedBreakdown"></div>
+  <hr style="border:0;border-top:1px solid var(--line);margin:12px 0">
+  <h3>日別の実績損益を直接入力</h3>
+  <div class="muted">入力したスワップ実績は、同じ日・口座・通貨ペアの予測額に置き換わります。為替差損益・手数料などは日別合計に加算されます。</div>
+  <div class="formgrid">
+   <div><label>損益の種類</label><select id="dailyType"><option value="swap">スワップ実績</option><option value="fx">為替差損益</option><option value="fee">手数料・調整額</option><option value="other">その他損益</option></select></div>
+   <div><label>FX会社・口座</label><select id="dailyBroker"></select></div>
+   <div><label>通貨ペア</label><select id="dailyPair"></select></div>
+   <div><label>金額（円）</label><input type="number" id="dailyAmount" step="1" placeholder="利益は＋、損失は−"></div>
+   <div class="wide"><label>メモ（任意）</label><input id="dailyMemo" placeholder="例：ヒロセ通商の日次確定スワップ"></div>
+  </div>
+  <button id="saveDailyEntry" style="width:100%;margin-top:10px">この日の実績を登録</button>
+  <div id="dailyEntryList" style="margin-top:8px"></div>
   <div class="formgrid">
    <div><label>通貨ペア</label><select id="multPair"></select></div>
    <div><label>付与日数（0～6）</label><select id="multiplier"><option value="0">0日（付与なし）</option><option value="1">1日</option><option value="2">2日</option><option value="3">3日</option><option value="4">4日</option><option value="5">5日</option><option value="6">6日</option></select></div>
   </div>
   <button id="saveMultiplier" style="width:100%;margin-top:10px">この日付・通貨ペアに適用</button>
-  <hr style="border:0;border-top:1px solid var(--line);margin:16px 0">
-  <h3>日別スワップ実績（直接入力）</h3>
-  <p class="muted">入力した通貨ペアの予測額を、その日の確定実績額に置き換えます。マイナスも入力できます。</p>
-  <div class="formgrid"><div><label>通貨ペア</label><select id="actualSwapPair"></select></div><div><label>実績スワップ（円）</label><input type="number" id="actualSwapAmount" step="1" placeholder="例：6678"></div></div>
-  <button id="saveActualSwap" style="width:100%;margin-top:10px">スワップ実績を保存</button><button id="clearActualSwap" class="secondary" style="width:100%;margin-top:7px">この日の実績入力を解除</button>
-  <hr style="border:0;border-top:1px solid var(--line);margin:16px 0">
-  <h3>その他の日別損益</h3><p class="muted">為替差損益・手数料・その他を円で入力します。手数料は支出としてマイナスで入力してください。</p>
-  <div class="formgrid"><div><label>為替差損益（円）</label><input type="number" id="dayFx" step="1" placeholder="例：12000 または -5000"></div><div><label>手数料（円）</label><input type="number" id="dayFee" step="1" placeholder="例：-330"></div><div class="wide"><label>その他損益（円）</label><input type="number" id="dayOther" step="1" placeholder="例：500"></div><div class="wide"><label>メモ</label><input id="dayMemo" placeholder="任意"></div></div>
-  <button id="saveDayPnl" style="width:100%;margin-top:10px">その他損益を保存</button>
  </div>
 </section>
 <section id="trades" class="tab hidden">
@@ -142,7 +149,7 @@ footer{text-align:center;color:#7b8791;font-size:11px;padding:10px}
   </div>
   <div class="muted" id="marginCheck" style="margin-top:8px"></div>
   <button id="saveMargin" style="width:100%;margin-top:10px">証拠金情報を保存</button>
-  <small class="muted">基準データ：2026/11/09 21:12。実際の発注可否は必ずFX会社の画面で確認してください。</small>
+  <small class="muted">基準データ：<span id="marginAsOf">—</span>。実際の発注可否は必ずFX会社の画面で確認してください。</small>
  </div>
  <div class="card">
   <h2>通貨ペアの管理</h2><div class="formgrid"><div class="wide"><label>通貨ペアを追加</label><input id="newPair" placeholder="例：USD/TRY"></div></div><button id="addPair" style="margin-top:10px">通貨ペアを追加</button><div id="pairList" style="margin-top:10px"></div>
@@ -164,7 +171,7 @@ const today=()=>new Date().toLocaleDateString('en-CA');
 const initial=()=>({
  brokers:['ヒロセ通商'],
  pairs:['CHF/TRY','EUR/TRY','USD/TRY','TRY/JPY','MXN/JPY','ZAR/JPY','CHF/MXN','CHF/ZAR','USD/JPY','EUR/USD'],
- trades:[],rates:[],multipliers:[],settlements:[],
+ trades:[],rates:[],multipliers:[],settlements:[],dailyEntries:[],tripleDay:{},
  // Initial balance snapshot: quantities are actual currency units; 1 lot = 1,000 units at Hirose.
  openingPositions:[
   {broker:'ヒロセ通商',pair:'EUR/TRY',side:'売り',qty:8000,avg:56.2027,date:'2026-11-09',openingSwap:0},
@@ -176,23 +183,33 @@ const initial=()=>({
  ],
  margin:{deposit:975592,equity:916996,required:384400,order:112800,floating:-58596,positionPnl:-114635,unrealizedSwap:56039,available:419796,leverage:10.37,asOf:'2026/11/09 21:12'}
 });
-let db=load(), currentMonth=today().slice(0,7), selectedDate=today();
-function load(){try{const fresh=localStorage.getItem(KEY);const legacy=fresh?null:localStorage.getItem('swap-calendar-v1');const old=JSON.parse(fresh||legacy||'{}');let d={...initial(),...old};d.brokers=[...new Set([...initial().brokers,...(d.brokers||[])])];d.pairs=[...new Set([...initial().pairs,...(d.pairs||[])])];d.trades=d.trades||[];d.rates=d.rates||[];d.multipliers=d.multipliers||[];d.settlements=d.settlements||[];d.dailySwapActuals=d.dailySwapActuals||[];d.dailyPnl=d.dailyPnl||[];d.quotes=d.quotes||initial().quotes;d.openingPositions=d.openingPositions||initial().openingPositions;d.margin={...initial().margin,...(d.margin||{})};if(legacy&&!fresh){localStorage.setItem(KEY,JSON.stringify(d));}return d}catch{return initial()}}
-function save(){localStorage.setItem(KEY,JSON.stringify(db));render()}
-const $=id=>document.getElementById(id), money=n=>'¥'+Math.round(n||0).toLocaleString('ja-JP'), esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let db=load(), currentMonth=today().slice(0,7), selectedDate=wkday(today(),-1);
+function normalize(old){const I=initial();let d={...I,...old};d.brokers=[...new Set([...I.brokers,...(d.brokers||[])])];d.pairs=[...new Set([...I.pairs,...(d.pairs||[])])];for(const k of ['trades','rates','multipliers','settlements','dailyEntries'])d[k]=Array.isArray(d[k])?d[k]:[];d.quotes=Array.isArray(d.quotes)?d.quotes:I.quotes;d.openingPositions=Array.isArray(d.openingPositions)?d.openingPositions:I.openingPositions;d.tripleDay=d.tripleDay&&typeof d.tripleDay==='object'?d.tripleDay:{};d.margin={...I.margin,...(d.margin||{})};return d}
+function load(){let raw=null;try{raw=localStorage.getItem(KEY);const legacy=raw?null:localStorage.getItem('swap-calendar-v1');const d=normalize(JSON.parse(raw||legacy||'{}'));if(legacy&&!raw)localStorage.setItem(KEY,JSON.stringify(d));return d}catch(e){if(raw){try{localStorage.setItem(KEY+'-corrupt-'+Date.now(),raw)}catch{}}return initial()}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(db))}catch(e){alert('保存に失敗しました。ブラウザの容量や設定を確認し、先にバックアップを保存してください。')}render()}
+const $=id=>document.getElementById(id), money=n=>{const r=Math.round(n||0)||0;return (r<0?'-':'')+'¥'+Math.abs(r).toLocaleString('ja-JP')}, esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function opts(id,arr,keep=true){let old=$(id).value;$(id).innerHTML=arr.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('');if(keep&&arr.includes(old))$(id).value=old}
-function initSelects(){['tradeBroker','settleBroker','rateBroker'].forEach(id=>opts(id,db.brokers));['tradePair','settlePair','ratePair','multPair','quotePair','actualSwapPair'].forEach(id=>opts(id,db.pairs))}
+function initSelects(){['tradeBroker','settleBroker','rateBroker','dailyBroker'].forEach(id=>opts(id,db.brokers));['tradePair','settlePair','ratePair','multPair','quotePair','dailyPair'].forEach(id=>opts(id,db.pairs))}
 function holding(b,p,s,d){
  const base=db.openingPositions.filter(x=>x.broker===b&&x.pair===p&&x.side===s&&x.date<=d).reduce((a,x)=>a+x.qty,0);
  return base+db.trades.filter(t=>t.broker===b&&t.pair===p&&t.side===s&&t.date<=d).reduce((a,t)=>a+(t.action==='新規'?t.qty:-t.qty),0)
 }
 function rateAt(b,p,s,d){let r=db.rates.filter(x=>x.broker===b&&x.pair===p&&x.side===s&&x.date<=d).sort((a,b)=>b.date.localeCompare(a.date))[0];return r?Number(r.value):0}
-function multiplier(p,d){let x=db.multipliers.find(x=>x.pair===p&&x.date===d);return x?x.days:1}
-function dailyPair(d,p,b=null){const actual=db.dailySwapActuals.find(x=>x.date===d&&x.pair===p);if(actual&&!b)return Number(actual.amount||0);return db.brokers.filter(x=>!b||x===b).reduce((sum,br)=>{const sideSum=['売り','買い'].reduce((v,s)=>v+(holding(br,p,s,d)/10000)*rateAt(br,p,s,d)*multiplier(p,d),0);return sum+sideSum;},0)}
-function forecastPairForDate(d,p){return db.brokers.reduce((sum,br)=>sum+['売り','買い'].reduce((v,side)=>v+(holding(br,p,side,d)/10000)*rateAt(br,p,side,d)*multiplier(p,d),0),0)}
+const tomorrow=()=>{let d=new Date(today()+'T12:00:00');d.setDate(d.getDate()+1);return d.toLocaleDateString('en-CA')};
+function wkday(d,dir){const t=new Date(d+'T12:00:00');while(t.getDay()%6===0)t.setDate(t.getDate()+dir);return t.toLocaleDateString('en-CA')}
+function pickDate(m){return m===today().slice(0,7)?wkday(today(),-1):wkday(m+'-01',1)}
+// 付与日数の既定：土日0日／3日付与の曜日(既定は水曜・通貨ペア別に設定可)3日／その他1日。日別に登録した値が優先。
+function defaultDays(p,d){const w=new Date(d+'T12:00:00').getDay();if(w===0||w===6)return 0;return w===((db.tripleDay&&db.tripleDay[p])??3)?3:1}
+function multiplier(p,d){let x=db.multipliers.find(x=>x.pair===p&&x.date===d);return x?Number(x.days):defaultDays(p,d)}
+function linkedTrade(s){return db.trades.find(t=>String(t.id)===String(s.tradeId))||db.trades.find(t=>t.action==='決済'&&t.broker===s.broker&&t.pair===s.pair&&t.side===s.side&&t.date===s.date&&t.qty===s.qty)}
+function allMonths(){const ds=[...db.openingPositions,...db.trades,...db.rates,...db.settlements,...db.dailyEntries].map(x=>x.date).filter(Boolean).sort();const t=today().slice(0,7);if(!ds.length)return [t];const out=[];let [y,m]=ds[0].slice(0,7).split('-').map(Number);const [ty,tm]=t.split('-').map(Number);while(y<ty||(y===ty&&m<=tm)){out.push(y+'-'+String(m).padStart(2,'0'));if(++m>12){m=1;y++}}return out}
+function syncMult(){const p=$('multPair').value||db.pairs[0];$('multPair').value=p;$('multiplier').value=String(multiplier(p,selectedDate))}
+function renderWeekendNote(){const items=monthDays(currentMonth).filter(d=>{const w=new Date(d+'T12:00:00').getDay();return (w===0||w===6)&&(Math.round(dailyTotal(d))||db.multipliers.some(x=>x.date===d)||db.dailyEntries.some(e=>e.date===d))});$('weekendNote').innerHTML=items.length?'土日に金額・設定がある日：'+items.map(d=>`<button class="secondary" data-wk="${d}" style="padding:4px 8px;margin:2px">${Number(d.slice(8))}日 ${money(dailyTotal(d))}</button>`).join(''):'';document.querySelectorAll('[data-wk]').forEach(b=>b.onclick=()=>{selectedDate=b.dataset.wk;render()})}
+function dailyPair(d,p,b=null){return db.brokers.filter(x=>!b||x===b).reduce((sum,br)=>{const actual=db.dailyEntries.filter(e=>e.date===d&&e.type==='swap'&&e.pair===p&&e.broker===br);if(actual.length)return sum+actual.reduce((v,e)=>v+Number(e.amount||0),0);const sideSum=['売り','買い'].reduce((v,s)=>v+(holding(br,p,s,d)/10000)*rateAt(br,p,s,d)*multiplier(p,d),0);return sum+sideSum;},0)}
 function daily(d,b=null){return db.pairs.reduce((a,p)=>a+dailyPair(d,p,b),0)}
-function dayPnl(d){return db.dailyPnl.filter(x=>x.date===d).reduce((a,x)=>a+Number(x.fx||0)+Number(x.fee||0)+Number(x.other||0),0)}
-function dayTotal(d){return daily(d)+dayPnl(d)}
+function dailyExtras(d,b=null){return db.dailyEntries.filter(e=>e.date===d&&e.type!=='swap'&&(!b||e.broker===b)).reduce((a,e)=>a+Number(e.amount||0),0)}
+function dailyTotal(d){return daily(d)+dailyExtras(d)}
+function dailyTypeTotal(d,type){return db.dailyEntries.filter(e=>e.date===d&&e.type===type).reduce((a,e)=>a+Number(e.amount||0),0)}
 function daysIn(m){let [y,mo]=m.split('-').map(Number);return new Date(y,mo,0).getDate()}
 function monthDays(m){return Array.from({length:daysIn(m)},(_,i)=>m+'-'+String(i+1).padStart(2,'0'))}
 function realizedFor(d,p=null,b=null){return db.settlements.filter(x=>x.date<=d&&(!p||x.pair===p)&&(!b||x.broker===b)).reduce((a,x)=>a+x.fx+x.swap,0)}
@@ -220,62 +237,49 @@ function monthActualSwap(m){
    + db.settlements.filter(x=>x.date.startsWith(m)&&x.date<=cutoff).reduce((a,x)=>a+settlementSwapContribution(x),0);
 }
 function monthActualFx(m){
- return db.settlements.filter(x=>x.date.startsWith(m)&&x.date<=today()).reduce((a,x)=>a+Number(x.fx||0),0)+db.dailyPnl.filter(x=>x.date.startsWith(m)&&x.date<=today()).reduce((a,x)=>a+Number(x.fx||0)+Number(x.fee||0)+Number(x.other||0),0);
+ return db.settlements.filter(x=>x.date.startsWith(m)&&x.date<=today()).reduce((a,x)=>a+Number(x.fx||0),0)
+   + db.dailyEntries.filter(e=>e.date.startsWith(m)&&e.date<=today()&&e.type!=='swap').reduce((a,e)=>a+Number(e.amount||0),0);
 }
 function monthNet(m){return monthActualSwap(m)+monthActualFx(m)}
 function yearNet(y){let months=Array.from({length:12},(_,i)=>`${y}-${String(i+1).padStart(2,'0')}`);return months.reduce((a,m)=>a+monthNet(m),0)}
 function realizedSwapTotal(){return db.settlements.reduce((a,x)=>a+x.swap,0)}
 function allNet(){let minDates=[...db.trades.map(x=>x.date),...db.rates.map(x=>x.date),...db.settlements.map(x=>x.date)];if(!minDates.length)return 0;let start=minDates.sort()[0],end=today();let total=0;let d=new Date(start+'T12:00:00');let stop=new Date(end+'T12:00:00');for(;d<=stop;d.setDate(d.getDate()+1)){let ds=d.toLocaleDateString('en-CA');total+=daily(ds)+db.settlements.filter(x=>x.date===ds).reduce((a,x)=>a+x.fx,0)}return total}
-function setTab(name){document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('hidden',x.id!==name));document.querySelectorAll('nav button').forEach(x=>{let a=x.dataset.tab===name;x.classList.toggle('active',a);x.classList.toggle('secondary',!a)})}
+function setTab(name){if(name==='analysis')requestAnimationFrame(()=>{renderSwapForecast();renderAnalysis()});document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('hidden',x.id!==name));document.querySelectorAll('nav button').forEach(x=>{let a=x.dataset.tab===name;x.classList.toggle('active',a);x.classList.toggle('secondary',!a)})}
 document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>setTab(b.dataset.tab));
 function renderCalendar(){
- let [y,m]=currentMonth.split('-').map(Number);
- // FX swap calendar: weekends are omitted to give weekdays more room.
- let html=['月','火','水','木','金'].map(x=>`<div class="dow">${x}</div>`).join('');
- for(let i=1;i<=daysIn(currentMonth);i++){
-  let d=currentMonth+'-'+String(i).padStart(2,'0'),weekday=new Date(y,m-1,i).getDay();
-  if(weekday===0||weekday===6)continue;
-  let mult=db.multipliers.some(x=>x.date===d&&x.days!==1),v=dayTotal(d),cls=v<0?'negative':'positive',hasActual=db.dailySwapActuals.some(x=>x.date===d);
-  html+=`<button class="day ${d===selectedDate?'selected':''}" data-date="${d}"><span class="num">${i}日</span>${mult?`<span class="mult">付与設定</span>`:''}<span class="swapmark">SW ${Math.round(daily(d)).toLocaleString()}</span><span class="amt ${dayPnl(d)<0?'negative':'positive'}">損益 ${Math.round(dayPnl(d)).toLocaleString()}</span><span class="amt ${cls}">計 ${Math.round(v).toLocaleString()}</span>${hasActual?'<span class="swapmark">実績</span>':''}</button>`;
- }
+ let [y,m]=currentMonth.split('-').map(Number),first=(new Date(y,m-1,1).getDay()+6)%7,html=['月','火','水','木','金'].map(x=>`<div class="dow">${x}</div>`).join('');
+ for(let i=0;i<(first>4?0:first);i++)html+='<div class="day empty"></div>';
+ for(let i=1;i<=daysIn(currentMonth);i++){let wd=new Date(y,m-1,i).getDay();if(wd===0||wd===6)continue;let d=currentMonth+'-'+String(i).padStart(2,'0'),mult=db.multipliers.some(x=>x.date===d&&Number(x.days)!==defaultDays(x.pair,d)),v=dailyTotal(d);html+=`<button class="day ${d===selectedDate?'selected':''}" data-date="${d}"><span class="num">${i}</span>${mult?`<span class="mult">付与変更</span>`:''}<span class="amt ${v<0?'negative':'positive'}">${d>today()?'予 ':''}${(Math.round(v)||0).toLocaleString()}</span></button>`}
  $('calendarGrid').innerHTML=html;document.querySelectorAll('.day[data-date]').forEach(b=>b.onclick=()=>{selectedDate=b.dataset.date;render()});
- $('monthTitle').textContent=`${y}年 ${m}月（平日）`;
- let total=dayTotal(selectedDate);$('selectedTitle').textContent=selectedDate+' の内訳';$('selectedTotal').textContent=money(total);$('selectedTotal').className='big '+(total>=0?'positive':'negative');
- $('selectedBreakdown').innerHTML=db.pairs.map(p=>{let a=db.dailySwapActuals.find(x=>x.date===selectedDate&&x.pair===p),forecast=forecastPairForDate(selectedDate,p),shown=a?Number(a.amount||0):forecast,diff=a?Number(a.amount||0)-forecast:null;return `<div class="item"><div class="row"><span>${esc(p)} <small class="muted">(${multiplier(p,selectedDate)}日${a?'・実績':''})</small></span><strong class="${shown<0?'negative':'positive'}">${money(shown)}</strong></div><small class="muted">予測 ${money(forecast)}${a?` ／ 実績 ${money(a.amount)} ／ 差額 <b class="${diff<0?'negative':'positive'}">${money(diff)}</b>`:''}</small></div>`}).join('')+`<div class="item row"><span>その他損益（為替差損益・手数料等）</span><strong class="${dayPnl(selectedDate)<0?'negative':'positive'}">${money(dayPnl(selectedDate))}</strong></div>`;
- let actual=db.dailySwapActuals.find(x=>x.date===selectedDate&&x.pair===$('actualSwapPair').value)||db.dailySwapActuals.find(x=>x.date===selectedDate);$('actualSwapPair').value=actual?.pair||db.pairs[0];$('actualSwapAmount').value=actual?actual.amount:'';let pnl=db.dailyPnl.find(x=>x.date===selectedDate)||{};$('dayFx').value=pnl.fx??'';$('dayFee').value=pnl.fee??'';$('dayOther').value=pnl.other??'';$('dayMemo').value=pnl.memo||'';
- $('multiplier').value=String(multiplier(db.pairs[0],selectedDate));$('multPair').value=db.pairs[0];
+ $('monthTitle').textContent=`${y}年 ${m}月`;let total=dailyTotal(selectedDate);$('selectedTitle').textContent=selectedDate+' の内訳';$('selectedTotal').textContent=money(total);$('selectedTotal').className='big '+(total>=0?'positive':'negative');
+ $('selectedBreakdown').innerHTML=db.pairs.map(p=>{let v=dailyPair(selectedDate,p);let actual=db.dailyEntries.some(e=>e.date===selectedDate&&e.type==='swap'&&e.pair===p);return `<div class="item row"><span>${esc(p)} <small class="muted">(${multiplier(p,selectedDate)}日${actual?'・実績':''})</small></span><strong class="${v<0?'negative':'swap-color'}">${money(v)}</strong></div>`}).join('')+
+  ['fx','fee','other'].map(t=>{let v=dailyTypeTotal(selectedDate,t),label={fx:'為替差損益',fee:'手数料・調整額',other:'その他損益'}[t];return v?`<div class="item row"><span>${label}</span><strong class="${v<0?'negative':t==='fx'?'fx-color':'other-color'}">${money(v)}</strong></div>`:''}).join('');
+ $('dailyEntryList').innerHTML=db.dailyEntries.filter(e=>e.date===selectedDate).map(e=>`<div class="item row"><span><b>${{swap:'スワップ実績',fx:'為替差損益',fee:'手数料・調整額',other:'その他損益'}[e.type]}</b><small class="muted" style="display:block">${esc(e.broker)}・${esc(e.pair)} ${e.memo?'・'+esc(e.memo):''}</small></span><span><strong class="${Number(e.amount)<0?'negative':e.type==='swap'?'swap-color':e.type==='fx'?'fx-color':'other-color'}">${money(Number(e.amount))}</strong><button class="danger" data-del-daily="${e.id}" style="margin-left:6px;padding:5px 8px">削除</button></span></div>`).join('')||'<p class="muted">この日の実績入力はありません。</p>';
+ document.querySelectorAll('[data-del-daily]').forEach(b=>b.onclick=()=>{if(confirm('この日別実績を削除しますか？')){db.dailyEntries=db.dailyEntries.filter(e=>String(e.id)!==b.dataset.delDaily);save()}});
+ syncMult();renderWeekendNote();
 }
 function renderPositions(){
  let html='';
  for(let b of db.brokers)for(let p of db.pairs)for(let s of ['売り','買い']){
-  let q=holding(b,p,s,selectedDate);if(q<=0)continue;
-  const base=db.openingPositions.filter(x=>x.broker===b&&x.pair===p&&x.side===s&&x.date<=selectedDate);
+  let q=holding(b,p,s,today());if(q<=0)continue;
+  const base=db.openingPositions.filter(x=>x.broker===b&&x.pair===p&&x.side===s&&x.date<=today());
   const baseQty=base.reduce((a,x)=>a+x.qty,0);
   const avg=baseQty?base.reduce((a,x)=>a+x.qty*x.avg,0)/baseQty:null;
   const sw=base.reduce((a,x)=>a+Number(x.openingSwap||0),0);
   html+=`<div class="item"><div class="row"><span>${esc(b)} · ${esc(p)} · ${s}</span><strong>${q.toLocaleString()}通貨（${(q/1000).toLocaleString()}ロット）</strong></div><small class="muted">初期平均レート ${avg===null?'—':avg.toFixed(4)} · 初期累積スワップ ${money(sw)}</small></div>`;
  }
- $('positions').innerHTML=html||'<p class="muted">選択日現在の保有建玉はありません。</p>';
+ $('positions').innerHTML=html||'<p class="muted">保有建玉はありません。</p>';
 }
 function renderHistories(){
  $('tradeHistory').innerHTML=[...db.trades].sort((a,b)=>b.date.localeCompare(a.date)).map(t=>`<div class="item row"><span><b>${esc(t.pair)} ${t.side}・${t.action}</b><br><small class="muted">${esc(t.date)} · ${esc(t.broker)} · ${t.qty.toLocaleString()}通貨</small></span><button class="danger" data-del-trade="${t.id}">削除</button></div>`).join('')||'<p class="muted">取引履歴はありません。</p>';
  $('settlementHistory').innerHTML=[...db.settlements].sort((a,b)=>b.date.localeCompare(a.date)).map(t=>`<div class="item"><div class="row"><b>${esc(t.pair)} ${esc(t.broker)}</b><strong class="${t.net>=0?'positive':'negative'}">${money(t.net)}</strong></div><small class="muted">${esc(t.date)} · ${t.qty.toLocaleString()}通貨</small><div class="muted">為替 ${money(t.fx)} + スワップ ${money(t.swap)}</div>${t.memo?`<small>${esc(t.memo)}</small>`:''}<button class="danger" data-del-settle="${t.id}" style="margin-top:6px">削除</button></div>`).join('')||'<p class="muted">決済履歴はありません。</p>';
- document.querySelectorAll('[data-del-trade]').forEach(b=>b.onclick=()=>{if(confirm('この取引履歴を削除しますか？保有数量と予測も変わります。')){db.trades=db.trades.filter(x=>String(x.id)!==b.dataset.delTrade);save()}});
- document.querySelectorAll('[data-del-settle]').forEach(b=>b.onclick=()=>{if(confirm('この決済履歴を削除しますか？')){db.settlements=db.settlements.filter(x=>String(x.id)!==b.dataset.delSettle);save()}});
+ document.querySelectorAll('[data-del-trade]').forEach(b=>b.onclick=()=>{const id=b.dataset.delTrade,lk=db.settlements.find(s=>{const t=linkedTrade(s);return t&&String(t.id)===id});if(confirm(lk?'この決済取引を削除すると、対応する決済履歴も削除されます。よろしいですか？':'この取引履歴を削除しますか？保有数量と予測も変わります。')){db.trades=db.trades.filter(x=>String(x.id)!==id);if(lk)db.settlements=db.settlements.filter(s=>s!==lk);save()}});
+ document.querySelectorAll('[data-del-settle]').forEach(b=>b.onclick=()=>{if(confirm('この決済履歴を削除しますか？対応する決済取引も削除され、保有数量が元に戻ります。')){const s=db.settlements.find(x=>String(x.id)===b.dataset.delSettle),t=s&&linkedTrade(s);if(t)db.trades=db.trades.filter(x=>x!==t);db.settlements=db.settlements.filter(x=>x!==s);save()}});
 }
-function forecastCreditDays(pair,start,end){
- let total=0,dt=new Date(start+'T12:00:00'),stop=new Date(end+'T12:00:00');
- for(;dt<=stop;dt.setDate(dt.getDate()+1)){
-  const d=dt.toLocaleDateString('en-CA'),weekday=dt.getDay();
-  // Default: weekdays accrue one credit day; weekends accrue none. Explicit broker/pair multiplier overrides this estimate.
-  const override=db.multipliers.find(x=>x.pair===pair&&x.date===d);
-  total+=override?Number(override.days):(weekday===0||weekday===6?0:1);
- }
- return total;
-}
+function forecastCreditDays(pair,start,end){let total=0;for(let dt=new Date(start+'T12:00:00'),stop=new Date(end+'T12:00:00');dt<=stop;dt.setDate(dt.getDate()+1))total+=multiplier(pair,dt.toLocaleDateString('en-CA'));return total}
 function forecastRange(start,end){
  let total=0;
- const from = start < today() ? today() : start;
+ const from = start < tomorrow() ? tomorrow() : start;
  if(from > end) return 0;
  for(const b of db.brokers)for(const p of db.pairs)for(const side of ['売り','買い']){
   const qty=holding(b,p,side,today()),unit=rateAt(b,p,side,today());
@@ -285,7 +289,7 @@ function forecastRange(start,end){
 }
 function currentDailyForecast(){
  const d=today();let total=0;
- for(const b of db.brokers)for(const p of db.pairs)for(const side of ['売り','買い'])total+=(holding(b,p,side,d)/10000)*rateAt(b,p,side,d)*multiplier(p,d);
+ for(const b of db.brokers)for(const p of db.pairs)for(const side of ['売り','買い'])total+=(holding(b,p,side,d)/10000)*rateAt(b,p,side,d);
  return total;
 }
 function renderSwapForecast(){
@@ -300,13 +304,13 @@ function renderSwapForecast(){
   const unit=rateAt(b,p,side,todayDate);
   details.push(`<div class="item row"><span>${esc(b)} · ${esc(p)} · ${side}<br><small class="muted">${qty.toLocaleString()}通貨 / 単価 ${money(unit)}／1万通貨・1付与日</small></span><b>${money(qty/10000*unit)} / 付与日</b></div>`);
  }
- $('swapForecast').innerHTML=`<div class="grid2"><div class="stat"><small>1付与日あたり</small><strong>${money(dailyEstimate)}</strong></div><div class="stat"><small>選択月の残日予測（平日・設定倍率反映）</small><strong>${money(monthEstimate)}</strong></div><div class="stat"><small>今後365日の予測（平日・設定倍率反映）</small><strong>${money(yearEstimate)}</strong></div></div><p class="muted">月間は今日以降の残日、年間は今日から365日を試算。土日は原則0日、登録済みの付与日倍率は反映します。祝日・臨時変更・将来の単価変更は未反映の概算です。</p><h3 style="margin-top:14px">口座・通貨ペア別の内訳</h3>${details.join('')||'<p class="muted">保有建玉がありません。</p>'}`;
+ $('swapForecast').innerHTML=`<div class="grid2"><div class="stat"><small>1付与日あたり</small><strong>${money(dailyEstimate)}</strong></div><div class="stat"><small>選択月の残日予測（平日・設定倍率反映）</small><strong>${money(monthEstimate)}</strong></div><div class="stat"><small>今後365日の予測（平日・設定倍率反映）</small><strong>${money(yearEstimate)}</strong></div></div><p class="muted">月間は今日以降の残日、年間は今日から365日を試算。既定は土日0日・水曜3日付与（設定タブで通貨ペア別に変更可）。日別に登録した付与日数は反映します。祝日・臨時変更・将来の単価変更は未反映の概算です。</p><h3 style="margin-top:14px">口座・通貨ペア別の内訳</h3>${details.join('')||'<p class="muted">保有建玉がありません。</p>'}`;
 }
 function renderAnalysis(){
  let y=Number($('analysisYear').value||new Date().getFullYear()),period=$('analysisPeriod').value;
  let months=Array.from({length:12},(_,i)=>`${y}-${String(i+1).padStart(2,'0')}`);
  let selected=period==='month'?currentMonth:null;
- const periodMonths=period==='month'?[selected]:period==='year'?months:null;
+ const periodMonths=period==='month'?[selected]:period==='year'?months:allMonths();
  let swap=periodMonths?periodMonths.reduce((a,m)=>a+monthActualSwap(m),0):
    db.settlements.filter(x=>x.date<=today()).reduce((a,x)=>a+settlementSwapContribution(x),0)+
    (()=>{let minDates=[...db.trades.map(x=>x.date),...db.rates.map(x=>x.date),...db.openingPositions.map(x=>x.date)].filter(Boolean);if(!minDates.length)return 0;let start=minDates.sort()[0],total=0;for(let dt=new Date(start+'T12:00:00'),stop=new Date(today()+'T12:00:00');dt<=stop;dt.setDate(dt.getDate()+1)){let d=dt.toLocaleDateString('en-CA');total+=daily(d)}return total})();
@@ -336,11 +340,11 @@ function renderAnalysis(){
 }
 function renderSettings(){
  $('brokerList').innerHTML=db.brokers.map(b=>`<div class="item row"><span>${esc(b)}</span><small class="muted">登録済み</small></div>`).join('');
- $('pairList').innerHTML=db.pairs.map(p=>`<div class="item row"><span>${esc(p)}</span><small class="muted">登録済み</small></div>`).join('');
- $('rateHistory').innerHTML='<h3 style="margin-top:14px">登録済み単価</h3>'+[...db.rates].sort((a,b)=>b.date.localeCompare(a.date)).map(r=>`<div class="item row"><span>${esc(r.broker)} · ${esc(r.pair)} · ${r.side}<br><small class="muted">${r.date}以降</small></span><b>${money(r.value)}</b></div>`).join('');
+ $('pairList').innerHTML=db.pairs.map(p=>`<div class="item row"><span>${esc(p)}</span><span class="muted">3日付与 <select data-triple="${esc(p)}" style="width:auto;padding:6px">${['月','火','水','木','金'].map((n,i)=>`<option value="${i+1}" ${((db.tripleDay[p]??3)===i+1)?'selected':''}>${n}</option>`).join('')}</select></span></div>`).join('')+'<div class="muted" style="margin-top:6px">3日付与の曜日は通貨ペアごとに設定できます（既定は水曜）。祝日などで変わる日は、カレンダーで日別に付与日数を登録してください。</div>';document.querySelectorAll('[data-triple]').forEach(x=>x.onchange=()=>{db.tripleDay[x.dataset.triple]=Number(x.value);save()});
+ (()=>{const rs=[...db.rates].sort((a,b)=>b.date.localeCompare(a.date));$('rateHistory').innerHTML='<h3 style="margin-top:14px">登録済み単価</h3>'+rs.map((r,i)=>`<div class="item row"><span>${esc(r.broker)} · ${esc(r.pair)} · ${r.side}<br><small class="muted">${r.date}以降</small></span><span><b>${money(r.value)}</b><button class="danger" data-del-rate="${i}" style="margin-left:6px;padding:5px 8px">削除</button></span></div>`).join('');document.querySelectorAll('[data-del-rate]').forEach(b=>b.onclick=()=>{if(confirm('この単価を削除しますか？')){db.rates=db.rates.filter(x=>x!==rs[Number(b.dataset.delRate)]);save()}})})();
  $('quoteHistory').innerHTML='<h3 style="margin-top:14px">現在の登録レート</h3>'+db.quotes.map(q=>`<div class="item row"><span>${esc(q.pair)}<br><small class="muted">${esc(q.source||'手動入力')} · ${esc(q.updated)}</small></span><b>${Number(q.value).toLocaleString('ja-JP',{maximumFractionDigits:6})}</b></div>`).join('')||'<p class="muted">レート未登録</p>';
  $('marginDeposit').value=db.margin.deposit??0;$('marginEquity').value=db.margin.equity??0;$('marginRequired').value=db.margin.required??0;$('marginOrder').value=db.margin.order??0;$('marginFloating').value=db.margin.floating??0;$('marginLeverage').value=db.margin.leverage??25;
- const ratio=Number(db.margin.required)>0?Number(db.margin.equity)/Number(db.margin.required)*100:null;
+ $('marginAsOf').textContent=db.margin.asOf||'—';const ratio=Number(db.margin.required)>0?Number(db.margin.equity)/Number(db.margin.required)*100:null;
  $('marginRatio').textContent=ratio===null?'—':ratio.toFixed(2)+'%';
  $('marginAvailable').textContent=money(Number(db.margin.equity||0)-Number(db.margin.required||0)-Number(db.margin.order||0));
  const equityCheck=Number(db.margin.deposit||0)+Number(db.margin.floating||0);
@@ -348,21 +352,20 @@ function renderSettings(){
 }
 function render(){
  initSelects();renderCalendar();renderPositions();renderHistories();renderSettings();
- $('heroMonth').textContent=money(monthActualSwap(currentMonth)+monthActualFx(currentMonth));
+ const act=monthActualSwap(currentMonth)+monthActualFx(currentMonth);$('heroMonth').textContent=money(act);$('heroLabel').textContent=Number(currentMonth.slice(5))+'月の実績損益（本日まで）';$('heroForecast').textContent=money(act+forecastRange(currentMonth+'-01',currentMonth+'-'+String(daysIn(currentMonth)).padStart(2,'0')));
  $('heroYear').textContent=money(yearNet(Number(currentMonth.slice(0,4))));
  $('heroPositions').textContent=db.brokers.reduce((a,b)=>a+db.pairs.reduce((v,p)=>v+['売り','買い'].filter(s=>holding(b,p,s,today())>0).length,0),0)+'件';
- renderSwapForecast();renderAnalysis();$('settlePreview').textContent=money(Number($('fxPnl').value||0)+Number($('settleSwap').value||0));
+ if(!$('analysis').classList.contains('hidden')){renderSwapForecast();renderAnalysis()}$('settlePreview').textContent=money(Number($('fxPnl').value||0)+Number($('settleSwap').value||0));
 }
-$('prevMonth').onclick=()=>{let d=new Date(currentMonth+'-01T12:00:00');d.setMonth(d.getMonth()-1);currentMonth=d.toLocaleDateString('en-CA').slice(0,7);selectedDate=currentMonth+'-01';render()};
-$('nextMonth').onclick=()=>{let d=new Date(currentMonth+'-01T12:00:00');d.setMonth(d.getMonth()+1);currentMonth=d.toLocaleDateString('en-CA').slice(0,7);selectedDate=currentMonth+'-01';render()};
-$('saveActualSwap').onclick=()=>{let pair=$('actualSwapPair').value,raw=$('actualSwapAmount').value;if(raw.trim()==='')return alert('実績金額を入力してください。');let amount=Number(raw);if(!Number.isFinite(amount))return alert('金額を確認してください。');db.dailySwapActuals=db.dailySwapActuals.filter(x=>!(x.date===selectedDate&&x.pair===pair));db.dailySwapActuals.push({date:selectedDate,pair,amount});save()};
-$('clearActualSwap').onclick=()=>{let pair=$('actualSwapPair').value;db.dailySwapActuals=db.dailySwapActuals.filter(x=>!(x.date===selectedDate&&x.pair===pair));save()};
-$('saveDayPnl').onclick=()=>{let fx=Number($('dayFx').value||0),fee=Number($('dayFee').value||0),other=Number($('dayOther').value||0),memo=$('dayMemo').value.trim();if([fx,fee,other].some(x=>!Number.isFinite(x)))return alert('金額を確認してください。');db.dailyPnl=db.dailyPnl.filter(x=>x.date!==selectedDate);if(fx||fee||other||memo)db.dailyPnl.push({date:selectedDate,fx,fee,other,memo});save()};
-$('saveMultiplier').onclick=()=>{let p=$('multPair').value,days=Number($('multiplier').value);db.multipliers=db.multipliers.filter(x=>!(x.date===selectedDate&&x.pair===p));db.multipliers.push({date:selectedDate,pair:p,days});save()};
+$('prevMonth').onclick=()=>{let d=new Date(currentMonth+'-01T12:00:00');d.setMonth(d.getMonth()-1);currentMonth=d.toLocaleDateString('en-CA').slice(0,7);selectedDate=pickDate(currentMonth);render()};
+$('nextMonth').onclick=()=>{let d=new Date(currentMonth+'-01T12:00:00');d.setMonth(d.getMonth()+1);currentMonth=d.toLocaleDateString('en-CA').slice(0,7);selectedDate=pickDate(currentMonth);render()};
+$('saveDailyEntry').onclick=()=>{let e={id:Date.now(),date:selectedDate,type:$('dailyType').value,broker:$('dailyBroker').value,pair:$('dailyPair').value,amount:Number($('dailyAmount').value),memo:$('dailyMemo').value.trim()};if(!$('dailyAmount').value.trim()||!Number.isFinite(e.amount)){alert('金額を入力してください。');return}if(e.type==='swap'){db.dailyEntries=db.dailyEntries.filter(x=>!(x.date===e.date&&x.type==='swap'&&x.broker===e.broker&&x.pair===e.pair));}db.dailyEntries.push(e);$('dailyAmount').value='';$('dailyMemo').value='';save()};
+$('saveMultiplier').onclick=()=>{let p=$('multPair').value,days=Number($('multiplier').value);db.multipliers=db.multipliers.filter(x=>!(x.date===selectedDate&&x.pair===p));if(days!==defaultDays(p,selectedDate))db.multipliers.push({date:selectedDate,pair:p,days});save()};
+$('multPair').onchange=syncMult;
 $('addTrade').onclick=()=>{let t={id:Date.now(),broker:$('tradeBroker').value,pair:$('tradePair').value,side:$('tradeSide').value,action:$('tradeAction').value,date:$('tradeDate').value,qty:Number($('tradeQty').value)};let before=holding(t.broker,t.pair,t.side,t.date);if(!t.date||!Number.isFinite(t.qty)||t.qty<=0){$('tradeError').textContent='日付と数量を正しく入力してください。';return}if(t.action==='決済'&&before<t.qty){$('tradeError').textContent=`決済数量が保有数量を超えています（保有 ${before.toLocaleString()}通貨）。`;return}db.trades.push(t);$('tradeError').textContent='登録しました。';$('tradeQty').value='';save()};
 function updateSettlePreview(){$('settlePreview').textContent=money(Number($('fxPnl').value||0)+Number($('settleSwap').value||0))}
 ['fxPnl','settleSwap'].forEach(id=>$(id).oninput=updateSettlePreview);
-$('addSettlement').onclick=()=>{let s={id:Date.now(),broker:$('settleBroker').value,pair:$('settlePair').value,side:$('settleSide').value,date:$('settleDate').value,qty:Number($('settleQty').value),fx:Number($('fxPnl').value),swap:Number($('settleSwap').value),memo:$('settleMemo').value};let q=holding(s.broker,s.pair,s.side,s.date);if(!s.date||!s.qty||s.qty<=0||s.qty>q){$('settleError').textContent=`決済数量を確認してください。該当建玉の保有数量は ${q.toLocaleString()}通貨です。`;return}if(!Number.isFinite(s.fx)||!Number.isFinite(s.swap)){$('settleError').textContent='損益金額を確認してください。';return}let t={id:Date.now()+1,broker:s.broker,pair:s.pair,side:s.side,action:'決済',date:s.date,qty:s.qty};db.trades.push(t);s.net=s.fx+s.swap;db.settlements.push(s);$('settleError').textContent='決済履歴と保有数量を更新しました。';$('settleQty').value='';$('fxPnl').value='';$('settleSwap').value='';save()};
+$('addSettlement').onclick=()=>{let s={id:Date.now(),broker:$('settleBroker').value,pair:$('settlePair').value,side:$('settleSide').value,date:$('settleDate').value,qty:Number($('settleQty').value),fx:Number($('fxPnl').value),swap:Number($('settleSwap').value),memo:$('settleMemo').value};let q=holding(s.broker,s.pair,s.side,s.date);if(!s.date||!s.qty||s.qty<=0||s.qty>q){$('settleError').textContent=`決済数量を確認してください。該当建玉の保有数量は ${q.toLocaleString()}通貨です。`;return}if(!Number.isFinite(s.fx)||!Number.isFinite(s.swap)){$('settleError').textContent='損益金額を確認してください。';return}let t={id:Date.now()+1,broker:s.broker,pair:s.pair,side:s.side,action:'決済',date:s.date,qty:s.qty};s.tradeId=t.id;db.trades.push(t);s.net=s.fx+s.swap;db.settlements.push(s);$('settleError').textContent='決済履歴と保有数量を更新しました。';$('settleQty').value='';$('fxPnl').value='';$('settleSwap').value='';save()};
 $('addRate').onclick=()=>{let r={broker:$('rateBroker').value,pair:$('ratePair').value,side:$('rateSide').value,date:$('rateDate').value,value:Number($('rateValue').value)};if(!r.date||$('rateValue').value.trim()===''||!Number.isFinite(r.value))return alert('日付と単価を入力してください。');db.rates=db.rates.filter(x=>!(x.broker===r.broker&&x.pair===r.pair&&x.side===r.side&&x.date===r.date));db.rates.push(r);save()};
 $('addBroker').onclick=()=>{let v=$('newBroker').value.trim();if(v&&!db.brokers.includes(v)){db.brokers.push(v);$('newBroker').value='';save()}else if(db.brokers.includes(v)){alert('同じ口座名が登録済みです。メイン・サブなど区別できる名前にしてください。')}};
 $('addPair').onclick=()=>{let v=$('newPair').value.trim().toUpperCase();if(v&&!db.pairs.includes(v)){db.pairs.push(v);$('newPair').value='';save()}};
@@ -376,12 +379,12 @@ $('analysisYear').innerHTML=Array.from({length:11},(_,i)=>new Date().getFullYear
 $('analysisYear').onchange=renderAnalysis;$('analysisPeriod').onchange=renderAnalysis;
 $('exportData').onclick=()=>download('swap-calendar-backup-'+today()+'.json',JSON.stringify(db,null,2),'application/json');
 $('importButton').onclick=()=>$('importFile').click();
-$('importFile').onchange=async e=>{try{let data=JSON.parse(await e.target.files[0].text());if(!Array.isArray(data.trades)||!Array.isArray(data.brokers))throw Error();if(confirm('現在のデータをバックアップ内容で置き換えますか？')){db={...initial(),...data};save();$('backupMsg').textContent='復元しました。'}}catch{$('backupMsg').textContent='バックアップファイルを読み込めませんでした。'}};
+$('importFile').onchange=async e=>{try{let f=e.target.files[0];e.target.value='';let data=JSON.parse(await f.text());if(!Array.isArray(data.trades)||!Array.isArray(data.brokers))throw Error();if(confirm('現在のデータをバックアップ内容で置き換えますか？')){db=normalize(data);save();$('backupMsg').textContent='復元しました。'}}catch{$('backupMsg').textContent='バックアップファイルを読み込めませんでした。'}};
 $('exportCsv').onclick=()=>{let rows=[['date','broker','pair','side','action','quantity'],...db.trades.map(t=>[t.date,t.broker,t.pair,t.side,t.action,t.qty])];download('swap-trades-'+today()+'.csv','\ufeff'+rows.map(r=>r.map(x=>'"'+String(x).replace(/"/g,'""')+'"').join(',')).join('\r\n'),'text/csv')};
 $('resetData').onclick=()=>{if(confirm('全ての取引・単価・決済・設定を削除します。この操作は取り消せません。先にバックアップしましたか？')){db=initial();save()}};
-function download(name,data,type){let a=document.createElement('a'),url=URL.createObjectURL(new Blob([data],{type}));a.href=url;a.download=name;a.click();URL.revokeObjectURL(url)}
+function download(name,data,type){const blob=new Blob([data],{type});const f=window.File&&new File([blob],name,{type});if(f&&navigator.canShare&&navigator.canShare({files:[f]})){navigator.share({files:[f],title:name}).catch(()=>{});return}let a=document.createElement('a'),url=URL.createObjectURL(blob);a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),4000)}
 ['tradeDate','settleDate','rateDate'].forEach(id=>$(id).value=today());
 render();
-if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
+if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').then(r=>r.update()).catch(()=>{});
 </script>
 </body></html>
