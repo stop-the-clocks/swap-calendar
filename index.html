@@ -14,7 +14,7 @@
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;padding-bottom:calc(24px + env(safe-area-inset-bottom))}
 header{background:var(--navy);color:white;padding:calc(16px + env(safe-area-inset-top)) 16px 18px;position:sticky;top:0;z-index:5}
 .brand{display:flex;align-items:center;justify-content:space-between;font-weight:800;letter-spacing:.06em}.brand span{color:var(--gold)}.hero-label{font-size:12px;color:#c5d0d9;margin-top:16px}.hero-total{font-size:30px;font-weight:800;margin:3px 0 12px}
-.stats{display:grid;grid-template-columns:1fr 1fr;gap:8px}.stat{background:#263e50;padding:10px;border-radius:12px}.stat small{display:block;color:#c5d0d9;font-size:11px}.stat strong{font-size:17px}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:8px}.stat{background:#263e50;padding:10px;border-radius:12px}.stat small{display:block;color:#e0e8ef;font-size:11px;font-weight:650}.stat strong{display:block;font-size:17px;color:#fff;line-height:1.35;font-weight:800}
 nav{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;padding:10px;background:var(--card);position:sticky;top:140px;z-index:4;border-bottom:1px solid var(--line)}nav button{min-width:0;padding:10px 4px;font-size:12px}
 main{max-width:760px;margin:auto;padding:12px}
 button,input,select{font:inherit}button{border:0;border-radius:10px;padding:11px 12px;background:var(--navy);color:white;font-weight:650;cursor:pointer}button.secondary{background:#e9eef2;color:#243746}button.danger{background:#fff0f0;color:var(--red)}button.active{background:var(--gold);color:#17212b}
@@ -22,7 +22,7 @@ button,input,select{font:inherit}button{border:0;border-radius:10px;padding:11px
 h2{font-size:17px;margin:0 0 12px}h3{font-size:14px;margin:0 0 8px}.muted{color:var(--muted);font-size:12px}.row{display:flex;align-items:center;justify-content:space-between;gap:8px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:9px}
 label{display:block;font-size:12px;color:var(--muted);margin:9px 0 5px}input,select{width:100%;padding:11px;border:1px solid #ccd5dd;border-radius:9px;background:white;color:var(--text);min-width:0}
 .formgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.formgrid>div{min-width:0}.formgrid input,.formgrid select{width:100%;min-width:0;font-size:14px;padding:10px 8px}.formgrid .wide{grid-column:1/-1}
-.calendar-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}.calendar{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}.dow{text-align:center;font-size:11px;color:var(--muted);padding:5px 0}.day{min-height:68px;background:#f7f9fa;border:1px solid var(--line);border-radius:8px;padding:5px 3px;text-align:left;color:var(--text);display:flex;flex-direction:column;gap:4px}.day.selected{border:2px solid var(--gold);padding:4px 2px}.day .num{font-size:11px}.day .amt{font-size:10px;font-weight:750;color:var(--green);overflow-wrap:anywhere}.day .mult{font-size:9px;color:#9b6b14}.day.empty{visibility:hidden}.positive{color:var(--green)}.negative{color:var(--red)}.big{font-size:25px;font-weight:800}
+.calendar-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}.calendar{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}.dow{text-align:center;font-size:11px;color:var(--muted);padding:5px 0}.day{min-height:68px;background:#f7f9fa;border:1px solid var(--line);border-radius:8px;padding:5px 3px;text-align:left;color:var(--text);display:flex;flex-direction:column;gap:4px}.day.selected{border:2px solid var(--gold);padding:4px 2px}.day .num{font-size:11px}.day .amt{font-size:10px;font-weight:750;color:var(--green);overflow-wrap:anywhere}.day .mult{font-size:9px;color:#9b6b14}.day.empty{visibility:hidden}.positive{color:var(--green)!important}.negative{color:var(--red)!important}.big{font-size:25px;font-weight:800;color:var(--text)}
 table{width:100%;border-collapse:collapse;font-size:13px}td,th{padding:9px 4px;border-bottom:1px solid var(--line);text-align:right}td:first-child,th:first-child{text-align:left}
 .item{padding:10px 0;border-bottom:1px solid var(--line)}.item:last-child{border-bottom:0}
 .hidden{display:none!important}.pill{display:inline-block;padding:4px 7px;border-radius:20px;background:#eef2f5;font-size:10px;color:#405363}
@@ -80,7 +80,7 @@ footer{text-align:center;color:#7b8791;font-size:11px;padding:10px}
    <div><label>蓄積スワップ（円）</label><input type="number" id="settleSwap" step="1" placeholder="通常はプラス"></div>
    <div class="wide"><label>メモ</label><input id="settleMemo" placeholder="任意"></div>
   </div>
-  <div class="notice" style="margin:10px 0">実現損益 ＝ 為替差損益 ＋ 蓄積スワップ</div>
+  <div class="notice" style="margin:10px 0">実現損益 ＝ 為替差損益 ＋ 蓄積スワップ（保有中の日次計上分は自動調整）</div>
   <div class="row"><span>決済後の実現損益</span><strong class="big" id="settlePreview">¥0</strong></div>
   <button id="addSettlement" style="width:100%;margin-top:10px">決済履歴に登録</button><div id="settleError" class="muted"></div>
  </div>
@@ -185,7 +185,32 @@ function daysIn(m){let [y,mo]=m.split('-').map(Number);return new Date(y,mo,0).g
 function monthDays(m){return Array.from({length:daysIn(m)},(_,i)=>m+'-'+String(i+1).padStart(2,'0'))}
 function realizedFor(d,p=null,b=null){return db.settlements.filter(x=>x.date<=d&&(!p||x.pair===p)&&(!b||x.broker===b)).reduce((a,x)=>a+x.fx+x.swap,0)}
 function swapReceivedFor(d,p=null,b=null){return monthDays(d.slice(0,7)).filter(x=>x<=d).reduce((a,day)=>a+db.pairs.filter(y=>!p||y===p).reduce((v,y)=>v+dailyPair(day,y,b),0),0)}
-function monthNet(m){return monthDays(m).reduce((a,d)=>a+daily(d),0)+db.settlements.filter(x=>x.date.startsWith(m)).reduce((a,x)=>a+x.fx,0)}
+// A settlement's entered swap is the broker's cumulative amount for the closed quantity.
+// Daily carry for that same quantity has already been counted while it was open, so subtract
+// that estimated overlap and add the broker's actual cumulative amount on the settlement date.
+function estimatedCarryBeforeSettlement(s){
+ const starts=[...db.openingPositions.filter(x=>x.broker===s.broker&&x.pair===s.pair&&x.side===s.side&&x.date<s.date).map(x=>x.date),
+   ...db.trades.filter(x=>x.broker===s.broker&&x.pair===s.pair&&x.side===s.side&&x.action==='新規'&&x.date<s.date).map(x=>x.date)];
+ if(!starts.length)return 0;
+ const start=starts.sort()[0];let total=0;
+ for(let dt=new Date(start+'T12:00:00'),stop=new Date(s.date+'T12:00:00');dt<stop;dt.setDate(dt.getDate()+1)){
+  const d=dt.toLocaleDateString('en-CA'),openQty=holding(s.broker,s.pair,s.side,d);
+  const closedQty=Math.min(Number(s.qty||0),Math.max(0,openQty));
+  const unit=rateAt(s.broker,s.pair,s.side,d);
+  if(closedQty&&unit)total+=(closedQty/10000)*unit*multiplier(s.pair,d);
+ }
+ return total;
+}
+function settlementSwapContribution(s){return Number(s.swap||0)-estimatedCarryBeforeSettlement(s)}
+function monthActualSwap(m){
+ const cutoff=today();
+ return monthDays(m).filter(d=>d<=cutoff).reduce((a,d)=>a+daily(d),0)
+   + db.settlements.filter(x=>x.date.startsWith(m)&&x.date<=cutoff).reduce((a,x)=>a+settlementSwapContribution(x),0);
+}
+function monthActualFx(m){
+ return db.settlements.filter(x=>x.date.startsWith(m)&&x.date<=today()).reduce((a,x)=>a+Number(x.fx||0),0);
+}
+function monthNet(m){return monthActualSwap(m)+monthActualFx(m)}
 function yearNet(y){let months=Array.from({length:12},(_,i)=>`${y}-${String(i+1).padStart(2,'0')}`);return months.reduce((a,m)=>a+monthNet(m),0)}
 function realizedSwapTotal(){return db.settlements.reduce((a,x)=>a+x.swap,0)}
 function allNet(){let minDates=[...db.trades.map(x=>x.date),...db.rates.map(x=>x.date),...db.settlements.map(x=>x.date)];if(!minDates.length)return 0;let start=minDates.sort()[0],end=today();let total=0;let d=new Date(start+'T12:00:00');let stop=new Date(end+'T12:00:00');for(;d<=stop;d.setDate(d.getDate()+1)){let ds=d.toLocaleDateString('en-CA');total+=daily(ds)+db.settlements.filter(x=>x.date===ds).reduce((a,x)=>a+x.fx,0)}return total}
@@ -194,7 +219,7 @@ document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>setTab(b.datase
 function renderCalendar(){
  let [y,m]=currentMonth.split('-').map(Number),first=new Date(y,m-1,1).getDay(),html=['日','月','火','水','木','金','土'].map(x=>`<div class="dow">${x}</div>`).join('');
  for(let i=0;i<first;i++)html+='<div class="day empty"></div>';
- for(let i=1;i<=daysIn(currentMonth);i++){let d=currentMonth+'-'+String(i).padStart(2,'0'),mult=db.multipliers.some(x=>x.date===d&&x.days!==1);html+=`<button class="day ${d===selectedDate?'selected':''}" data-date="${d}"><span class="num">${i}</span>${mult?`<span class="mult">付与 ${db.multipliers.find(x=>x.date===d&&x.pair===db.pairs[0])?.days??'設定' }日</span>`:''}<span class="amt">${Math.round(daily(d)).toLocaleString()}</span></button>`}
+ for(let i=1;i<=daysIn(currentMonth);i++){let d=currentMonth+'-'+String(i).padStart(2,'0'),mult=db.multipliers.some(x=>x.date===d&&x.days!==1);html+=`<button class="day ${d===selectedDate?'selected':''}" data-date="${d}"><span class="num">${i}</span>${mult?`<span class="mult">付与 ${db.multipliers.find(x=>x.date===d&&x.pair===db.pairs[0])?.days??'設定' }日</span>`:''}<span class="amt">${d>today()?'予 '+Math.round(daily(d)).toLocaleString():Math.round(daily(d)).toLocaleString()}</span></button>`}
  $('calendarGrid').innerHTML=html;document.querySelectorAll('.day[data-date]').forEach(b=>b.onclick=()=>{selectedDate=b.dataset.date;render()});
  $('monthTitle').textContent=`${y}年 ${m}月`;let total=daily(selectedDate);$('selectedTitle').textContent=selectedDate+' の内訳';$('selectedTotal').textContent=money(total);$('selectedTotal').className='big '+(total>=0?'positive':'negative');
  $('selectedBreakdown').innerHTML=db.pairs.map(p=>`<div class="item row"><span>${esc(p)} <small class="muted">(${multiplier(p,selectedDate)}日)</small></span><strong>${money(dailyPair(selectedDate,p))}</strong></div>`).join('');
@@ -230,9 +255,11 @@ function forecastCreditDays(pair,start,end){
 }
 function forecastRange(start,end){
  let total=0;
+ const from = start < today() ? today() : start;
+ if(from > end) return 0;
  for(const b of db.brokers)for(const p of db.pairs)for(const side of ['売り','買い']){
   const qty=holding(b,p,side,today()),unit=rateAt(b,p,side,today());
-  if(qty)total+=(qty/10000)*unit*forecastCreditDays(p,start,end);
+  if(qty)total+=(qty/10000)*unit*forecastCreditDays(p,from,end);
  }
  return total;
 }
@@ -253,19 +280,39 @@ function renderSwapForecast(){
   const unit=rateAt(b,p,side,todayDate);
   details.push(`<div class="item row"><span>${esc(b)} · ${esc(p)} · ${side}<br><small class="muted">${qty.toLocaleString()}通貨 / 単価 ${money(unit)}／1万通貨・1付与日</small></span><b>${money(qty/10000*unit)} / 付与日</b></div>`);
  }
- $('swapForecast').innerHTML=`<div class="grid2"><div class="stat"><small>1付与日あたり</small><strong>${money(dailyEstimate)}</strong></div><div class="stat"><small>選択月の見込み（平日・設定倍率反映）</small><strong>${money(monthEstimate)}</strong></div><div class="stat"><small>今後365日見込み（平日・設定倍率反映）</small><strong>${money(yearEstimate)}</strong></div></div><p class="muted">月間は選択月全体、年間は今日から365日を試算。土日は原則0日、登録済みの付与日倍率は反映します。祝日・臨時変更・将来の単価変更は未反映の概算です。</p><h3 style="margin-top:14px">口座・通貨ペア別の内訳</h3>${details.join('')||'<p class="muted">保有建玉がありません。</p>'}`;
+ $('swapForecast').innerHTML=`<div class="grid2"><div class="stat"><small>1付与日あたり</small><strong>${money(dailyEstimate)}</strong></div><div class="stat"><small>選択月の残日予測（平日・設定倍率反映）</small><strong>${money(monthEstimate)}</strong></div><div class="stat"><small>今後365日の予測（平日・設定倍率反映）</small><strong>${money(yearEstimate)}</strong></div></div><p class="muted">月間は今日以降の残日、年間は今日から365日を試算。土日は原則0日、登録済みの付与日倍率は反映します。祝日・臨時変更・将来の単価変更は未反映の概算です。</p><h3 style="margin-top:14px">口座・通貨ペア別の内訳</h3>${details.join('')||'<p class="muted">保有建玉がありません。</p>'}`;
 }
 function renderAnalysis(){
  let y=Number($('analysisYear').value||new Date().getFullYear()),period=$('analysisPeriod').value;
  let months=Array.from({length:12},(_,i)=>`${y}-${String(i+1).padStart(2,'0')}`);
  let selected=period==='month'?currentMonth:null;
- let swap=period==='month'?monthDays(selected).reduce((a,d)=>a+daily(d),0):period==='year'?months.reduce((a,m)=>a+monthDays(m).reduce((v,d)=>v+daily(d),0),0):allNet()-db.settlements.reduce((a,x)=>a+x.fx,0);
- let fx=period==='month'?db.settlements.filter(x=>x.date.startsWith(selected)).reduce((a,x)=>a+x.fx,0):period==='year'?db.settlements.filter(x=>x.date.startsWith(String(y))).reduce((a,x)=>a+x.fx,0):db.settlements.reduce((a,x)=>a+x.fx,0);
+ const periodMonths=period==='month'?[selected]:period==='year'?months:null;
+ let swap=periodMonths?periodMonths.reduce((a,m)=>a+monthActualSwap(m),0):
+   db.settlements.filter(x=>x.date<=today()).reduce((a,x)=>a+settlementSwapContribution(x),0)+
+   (()=>{let minDates=[...db.trades.map(x=>x.date),...db.rates.map(x=>x.date),...db.openingPositions.map(x=>x.date)].filter(Boolean);if(!minDates.length)return 0;let start=minDates.sort()[0],total=0;for(let dt=new Date(start+'T12:00:00'),stop=new Date(today()+'T12:00:00');dt<=stop;dt.setDate(dt.getDate()+1)){let d=dt.toLocaleDateString('en-CA');total+=daily(d)}return total})();
+ let fx=periodMonths?periodMonths.reduce((a,m)=>a+monthActualFx(m),0):db.settlements.filter(x=>x.date<=today()).reduce((a,x)=>a+Number(x.fx||0),0);
  let net=swap+fx;
- $('summary').innerHTML=`<div class="grid2"><div><small class="muted">スワップ予測/実績</small><div><b>${money(swap)}</b></div></div><div><small class="muted">決済為替損益</small><div><b>${money(fx)}</b></div></div></div><hr style="border:0;border-top:1px solid var(--line)"><small class="muted">合計損益（対象期間）</small><div class="big ${net>=0?'positive':'negative'}">${money(net)}</div>`;
- $('pairAnalysis').innerHTML=db.pairs.map(p=>{let s=period==='month'?monthDays(selected).reduce((a,d)=>a+dailyPair(d,p),0):period==='year'?months.reduce((a,m)=>a+monthDays(m).reduce((v,d)=>v+dailyPair(d,p),0),0):0;let f=db.settlements.filter(x=>x.pair===p&&(period==='month'?x.date.startsWith(selected):period==='year'?x.date.startsWith(String(y)):true)).reduce((a,x)=>a+x.fx,0);return `<div class="item row"><span>${esc(p)}</span><b>${money(s+f)}</b></div>`}).join('');
- $('brokerAnalysis').innerHTML=db.brokers.map(b=>{let s=period==='month'?monthDays(selected).reduce((a,d)=>a+daily(d,b),0):period==='year'?months.reduce((a,m)=>a+monthDays(m).reduce((v,d)=>v+daily(d,b),0),0):0;let f=db.settlements.filter(x=>x.broker===b&&(period==='month'?x.date.startsWith(selected):period==='year'?x.date.startsWith(String(y)):true)).reduce((a,x)=>a+x.fx,0);return `<div class="item row"><span>${esc(b)}</span><b>${money(s+f)}</b></div>`}).join('');
- $('monthAnalysis').innerHTML=months.map(m=>`<div class="item row"><span>${Number(m.slice(5))}月</span><b>${money(monthNet(m))}</b></div>`).join('');
+ $('summary').innerHTML=`<div class="grid2"><div><small class="muted">スワップ実績（本日まで）</small><div><b>${money(swap)}</b></div></div><div><small class="muted">決済為替損益（本日まで）</small><div><b>${money(fx)}</b></div></div></div><hr style="border:0;border-top:1px solid var(--line)"><small class="muted">実績合計（対象期間・本日まで）</small><div class="big ${net>=0?'positive':'negative'}">${money(net)}</div><p class="muted">将来日の予測額は実績に含めていません。決済時に登録したスワップは実績に加算します。</p>`;
+ $('pairAnalysis').innerHTML=db.pairs.map(p=>{
+   let s=periodMonths?periodMonths.reduce((a,m)=>a+monthDays(m).filter(d=>d<=today()).reduce((v,d)=>v+dailyPair(d,p),0),0):0;
+   let f=db.settlements.filter(x=>x.pair===p&&x.date<=today()&&(period==='month'?x.date.startsWith(selected):period==='year'?x.date.startsWith(String(y)):true)).reduce((a,x)=>a+Number(x.fx||0)+settlementSwapContribution(x),0);
+   return `<div class="item row"><span>${esc(p)}</span><b>${money(s+f)}</b></div>`
+ }).join('');
+ $('brokerAnalysis').innerHTML=db.brokers.map(b=>{
+   let s=periodMonths?periodMonths.reduce((a,m)=>a+monthDays(m).filter(d=>d<=today()).reduce((v,d)=>v+daily(d,b),0),0):0;
+   let f=db.settlements.filter(x=>x.broker===b&&x.date<=today()&&(period==='month'?x.date.startsWith(selected):period==='year'?x.date.startsWith(String(y)):true)).reduce((a,x)=>a+Number(x.fx||0)+settlementSwapContribution(x),0);
+   return `<div class="item row"><span>${esc(b)}</span><b>${money(s+f)}</b></div>`
+ }).join('');
+ $('monthAnalysis').innerHTML=months.map(m=>{
+   const actual=monthNet(m);
+   const futureStart=m+'-01' > today() ? m+'-01' : (m===today().slice(0,7) ? (()=>{let d=new Date(today()+'T12:00:00');d.setDate(d.getDate()+1);return d.toLocaleDateString('en-CA')})() : null);
+   const end=m+'-'+String(daysIn(m)).padStart(2,'0');
+   const forecast=futureStart&&futureStart<=end?forecastRange(futureStart,end):0;
+   const isFuture=m>today().slice(0,7);
+   const label=isFuture?'予測':m===today().slice(0,7)?'実績 '+money(actual)+' ＋ 残日予測 '+money(forecast):'実績';
+   const value=isFuture?forecast:actual+(m===today().slice(0,7)?forecast:0);
+   return `<div class="item row"><span>${Number(m.slice(5))}月<br><small class="muted">${label}</small></span><b>${money(value)}</b></div>`;
+ }).join('');
 }
 function renderSettings(){
  $('brokerList').innerHTML=db.brokers.map(b=>`<div class="item row"><span>${esc(b)}</span><small class="muted">登録済み</small></div>`).join('');
@@ -281,7 +328,7 @@ function renderSettings(){
 }
 function render(){
  initSelects();renderCalendar();renderPositions();renderHistories();renderSettings();
- $('heroMonth').textContent=money(monthDays(currentMonth).reduce((a,d)=>a+daily(d),0));
+ $('heroMonth').textContent=money(monthActualSwap(currentMonth)+monthActualFx(currentMonth));
  $('heroYear').textContent=money(yearNet(Number(currentMonth.slice(0,4))));
  $('heroPositions').textContent=db.brokers.reduce((a,b)=>a+db.pairs.reduce((v,p)=>v+['売り','買い'].filter(s=>holding(b,p,s,today())>0).length,0),0)+'件';
  renderSwapForecast();renderAnalysis();$('settlePreview').textContent=money(Number($('fxPnl').value||0)+Number($('settleSwap').value||0));
