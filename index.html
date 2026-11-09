@@ -105,7 +105,7 @@ button{touch-action:manipulation}.day{min-height:74px}.day .amt{font-size:11px}
 </section>
 <section id="analysis" class="tab hidden">
  <div class="card"><h2>集計期間</h2><div class="formgrid"><div><label>年</label><select id="analysisYear"></select></div><div><label>集計</label><select id="analysisPeriod"><option value="month">月別</option><option value="year">年間</option><option value="all">通算</option></select></div></div></div>
- <div class="card"><h2>スワップ見込み（現在の保有数量・登録単価ベース）</h2><div id="swapForecast"></div><div class="muted">現在の建玉数量と、登録済みの売買別スワップ単価から試算します。単価未登録の建玉は見込みに含まれません。将来の単価変更・為替会社の付与日変更は反映されない概算です。</div></div><div class="card"><h2>損益サマリー</h2><div id="summary"></div></div>
+ <div class="card"><h2>スワップ見込み（最新のスワップ実績ベース）</h2><div id="swapForecast"></div><div class="muted">口座・通貨ペアごとの最新スワップ実績を1付与日分の基準額として、各日の付与日数を掛けて試算します。実績がまだない場合のみ、登録単価と保有数量から暫定計算します。</div></div><div class="card"><h2>損益サマリー</h2><div id="summary"></div></div>
  <div class="card"><h2>通貨ペア別</h2><div id="pairAnalysis"></div></div>
  <div class="card"><h2>FX会社別</h2><div id="brokerAnalysis"></div></div>
  <div class="card"><h2>月別スワップ・実現損益</h2><div id="monthAnalysis"></div></div>
@@ -205,7 +205,24 @@ function linkedTrade(s){return db.trades.find(t=>String(t.id)===String(s.tradeId
 function allMonths(){const ds=[...db.openingPositions,...db.trades,...db.rates,...db.settlements,...db.dailyEntries].map(x=>x.date).filter(Boolean).sort();const t=today().slice(0,7);if(!ds.length)return [t];const out=[];let [y,m]=ds[0].slice(0,7).split('-').map(Number);const [ty,tm]=t.split('-').map(Number);while(y<ty||(y===ty&&m<=tm)){out.push(y+'-'+String(m).padStart(2,'0'));if(++m>12){m=1;y++}}return out}
 function syncMult(){const p=$('multPair').value||db.pairs[0];$('multPair').value=p;$('multiplier').value=String(multiplier(p,selectedDate))}
 function renderWeekendNote(){const items=monthDays(currentMonth).filter(d=>{const w=new Date(d+'T12:00:00').getDay();return (w===0||w===6)&&(Math.round(dailyTotal(d))||db.multipliers.some(x=>x.date===d)||db.dailyEntries.some(e=>e.date===d))});$('weekendNote').innerHTML=items.length?'土日に金額・設定がある日：'+items.map(d=>`<button class="secondary" data-wk="${d}" style="padding:4px 8px;margin:2px">${Number(d.slice(8))}日 ${money(dailyTotal(d))}</button>`).join(''):'';document.querySelectorAll('[data-wk]').forEach(b=>b.onclick=()=>{selectedDate=b.dataset.wk;render()})}
-function dailyPair(d,p,b=null){return db.brokers.filter(x=>!b||x===b).reduce((sum,br)=>{const actual=db.dailyEntries.filter(e=>e.date===d&&e.type==='swap'&&e.pair===p&&e.broker===br);if(actual.length)return sum+actual.reduce((v,e)=>v+Number(e.amount||0),0);const sideSum=['売り','買い'].reduce((v,s)=>v+(holding(br,p,s,d)/10000)*rateAt(br,p,s,d)*multiplier(p,d),0);return sum+sideSum;},0)}
+// 口座・通貨ペアごとの最新スワップ実績を1付与日分の基準額として扱う。
+// 実績登録日そのものは入力額をそのまま表示し、翌日以降は付与日数を乗算する。
+// まだ実績が一度もない場合に限り、従来の登録単価×保有数量を暫定値として使う。
+function latestSwapActual(br,p,d){
+ const e=db.dailyEntries.filter(x=>x.type==='swap'&&x.broker===br&&x.pair===p&&x.date<=d)
+   .sort((a,b)=>b.date.localeCompare(a.date));
+ if(!e.length)return null;
+ const date=e[0].date;
+ return {date,amount:e.filter(x=>x.date===date).reduce((v,x)=>v+Number(x.amount||0),0)};
+}
+function pairDailyAmount(br,p,d,qtyDate=d){
+ const actual=latestSwapActual(br,p,d);
+ if(actual)return actual.date===d?actual.amount:actual.amount*multiplier(p,d);
+ return ['売り','買い'].reduce((v,side)=>v+(holding(br,p,side,qtyDate)/10000)*rateAt(br,p,side,d)*multiplier(p,d),0);
+}
+function dailyPair(d,p,b=null){
+ return db.brokers.filter(br=>!b||br===b).reduce((sum,br)=>sum+pairDailyAmount(br,p,d,d),0);
+}
 function daily(d,b=null){return db.pairs.reduce((a,p)=>a+dailyPair(d,p,b),0)}
 function dailyExtras(d,b=null){return db.dailyEntries.filter(e=>e.date===d&&e.type!=='swap'&&(!b||e.broker===b)).reduce((a,e)=>a+Number(e.amount||0),0)}
 function dailyTotal(d){return daily(d)+dailyExtras(d)}
@@ -225,7 +242,8 @@ function estimatedCarryBeforeSettlement(s){
  for(let dt=new Date(start+'T12:00:00'),stop=new Date(s.date+'T12:00:00');dt<stop;dt.setDate(dt.getDate()+1)){
   const d=dt.toLocaleDateString('en-CA'),openQty=holding(s.broker,s.pair,s.side,d);
   const closedQty=Math.min(Number(s.qty||0),Math.max(0,openQty));
-  const unit=rateAt(s.broker,s.pair,s.side,d);
+  const actual=latestSwapActual(s.broker,s.pair,d);
+  const unit=actual?actual.amount:rateAt(s.broker,s.pair,s.side,d);
   if(closedQty&&unit)total+=(closedQty/10000)*unit*multiplier(s.pair,d);
  }
  return total;
@@ -279,17 +297,17 @@ function renderHistories(){
 function forecastCreditDays(pair,start,end){let total=0;for(let dt=new Date(start+'T12:00:00'),stop=new Date(end+'T12:00:00');dt<=stop;dt.setDate(dt.getDate()+1))total+=multiplier(pair,dt.toLocaleDateString('en-CA'));return total}
 function forecastRange(start,end){
  let total=0;
- const from = start < tomorrow() ? tomorrow() : start;
- if(from > end) return 0;
- for(const b of db.brokers)for(const p of db.pairs)for(const side of ['売り','買い']){
-  const qty=holding(b,p,side,today()),unit=rateAt(b,p,side,today());
-  if(qty)total+=(qty/10000)*unit*forecastCreditDays(p,from,end);
+ const from=start<tomorrow()?tomorrow():start;
+ if(from>end)return 0;
+ for(let dt=new Date(from+'T12:00:00'),stop=new Date(end+'T12:00:00');dt<=stop;dt.setDate(dt.getDate()+1)){
+  const d=dt.toLocaleDateString('en-CA');
+  for(const b of db.brokers)for(const p of db.pairs)total+=pairDailyAmount(b,p,d,today());
  }
  return total;
 }
 function currentDailyForecast(){
  const d=today();let total=0;
- for(const b of db.brokers)for(const p of db.pairs)for(const side of ['売り','買い'])total+=(holding(b,p,side,d)/10000)*rateAt(b,p,side,d);
+ for(const b of db.brokers)for(const p of db.pairs)total+=pairDailyAmount(b,p,d,d);
  return total;
 }
 function renderSwapForecast(){
@@ -302,9 +320,9 @@ function renderSwapForecast(){
  for(const b of db.brokers)for(const p of db.pairs)for(const side of ['売り','買い']){
   const qty=holding(b,p,side,todayDate); if(!qty) continue;
   const unit=rateAt(b,p,side,todayDate);
-  details.push(`<div class="item row"><span>${esc(b)} · ${esc(p)} · ${side}<br><small class="muted">${qty.toLocaleString()}通貨 / 単価 ${money(unit)}／1万通貨・1付与日</small></span><b>${money(qty/10000*unit)} / 付与日</b></div>`);
+  details.push(`<div class="item row"><span>${esc(b)} · ${esc(p)} · ${side}<br><small class="muted">${qty.toLocaleString()}通貨 / 最新実績 ${money((latestSwapActual(b,p,todayDate)||{amount:qty/10000*unit}).amount)}／1付与日</small></span><b>${money(pairDailyAmount(b,p,todayDate,todayDate))} / 付与日</b></div>`);
  }
- $('swapForecast').innerHTML=`<div class="grid2"><div class="stat"><small>1付与日あたり</small><strong>${money(dailyEstimate)}</strong></div><div class="stat"><small>選択月の残日予測（平日・設定倍率反映）</small><strong>${money(monthEstimate)}</strong></div><div class="stat"><small>今後365日の予測（平日・設定倍率反映）</small><strong>${money(yearEstimate)}</strong></div></div><p class="muted">月間は今日以降の残日、年間は今日から365日を試算。既定は土日0日・水曜3日付与（設定タブで通貨ペア別に変更可）。日別に登録した付与日数は反映します。祝日・臨時変更・将来の単価変更は未反映の概算です。</p><h3 style="margin-top:14px">口座・通貨ペア別の内訳</h3>${details.join('')||'<p class="muted">保有建玉がありません。</p>'}`;
+ $('swapForecast').innerHTML=`<div class="grid2"><div class="stat"><small>最新実績ベース・1付与日あたり</small><strong>${money(dailyEstimate)}</strong></div><div class="stat"><small>選択月の残日予測（平日・設定倍率反映）</small><strong>${money(monthEstimate)}</strong></div><div class="stat"><small>今後365日の予測（平日・設定倍率反映）</small><strong>${money(yearEstimate)}</strong></div></div><p class="muted">月間は今日以降の残日、年間は今日から365日を試算。既定は土日0日・水曜3日付与（設定タブで通貨ペア別に変更可）。日別に登録した付与日数は反映します。祝日・臨時変更・将来の単価変更は未反映の概算です。</p><h3 style="margin-top:14px">口座・通貨ペア別の内訳</h3>${details.join('')||'<p class="muted">保有建玉がありません。</p>'}`;
 }
 function renderAnalysis(){
  let y=Number($('analysisYear').value||new Date().getFullYear()),period=$('analysisPeriod').value;
