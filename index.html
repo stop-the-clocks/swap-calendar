@@ -30,7 +30,7 @@ table{width:100%;border-collapse:collapse;font-size:13px}td,th{padding:9px 4px;b
 .hidden{display:none!important}.pill{display:inline-block;padding:4px 7px;border-radius:20px;background:#eef2f5;font-size:10px;color:#405363}
 .notice{background:#fff8e9;border:1px solid #f1dfb9;padding:10px;border-radius:10px;font-size:12px;color:#6b5425}
 footer{text-align:center;color:#7b8791;font-size:11px;padding:10px}
-button{touch-action:manipulation}.day{min-height:74px}.day .amt{font-size:11px;white-space:nowrap;overflow-wrap:normal;letter-spacing:-.02em}.day{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}#selectedBreakdown .item{padding:6px 0;font-size:15px}.fc{margin-left:3px;font-size:9px;font-weight:700;color:#9b6b14;background:#fff3d6;border-radius:4px;padding:0 3px}
+button{touch-action:manipulation}.day{min-height:74px}.day .amt{font-size:11px;white-space:nowrap;overflow-wrap:normal;letter-spacing:-.02em}.day{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}#selectedBreakdown .item{padding:6px 0;font-size:15px}input[type=date]{-webkit-appearance:none;appearance:none;display:block;min-width:0;max-width:100%;box-sizing:border-box;min-height:44px;text-align:left}input[type=date]::-webkit-date-and-time-value{text-align:left}.fc{margin-left:3px;font-size:9px;font-weight:700;color:#9b6b14;background:#fff3d6;border-radius:4px;padding:0 3px}
 @media(min-width:600px){main{padding:20px}.day{min-height:82px}.day .amt{font-size:12px}}
 </style>
 </head>
@@ -79,8 +79,8 @@ button{touch-action:manipulation}.day{min-height:74px}.day .amt{font-size:11px;w
   <h2>新規・決済の登録</h2>
   <div class="formgrid">
    <div><label>FX会社</label><select id="tradeBroker"></select></div><div><label>通貨ペア</label><select id="tradePair"></select></div>
-   <div><label>売買</label><select id="tradeSide"><option>売り</option><option>買い</option></select></div><div><label>取引区分</label><select id="tradeAction"><option>新規</option><option>決済</option></select></div>
-   <div><label>取引日</label><input type="date" id="tradeDate"></div><div><label>数量（通貨・1ロット＝1,000通貨）</label><input type="number" id="tradeQty" min="1" step="1" placeholder="例：20000"></div>
+   <div><label>売買</label><select id="tradeSide"><option>売り</option><option>買い</option></select></div><div><label>取引区分</label><select id="tradeAction"><option>新規</option><option>決済</option><option>調整</option></select></div>
+   <div><label>取引日</label><input type="date" id="tradeDate"></div><div><label>数量（通貨）マイナス可</label><div style="display:flex;gap:6px"><input type="number" id="tradeQty" step="1" placeholder="例：20000"><button type="button" class="secondary" id="tradeQtySign" style="padding:0 12px">±</button></div></div>
   </div>
   <button id="addTrade" style="width:100%;margin-top:12px">取引を登録</button><div id="tradeError" class="muted"></div>
  </div>
@@ -163,7 +163,7 @@ button{touch-action:manipulation}.day{min-height:74px}.day .amt{font-size:11px;w
  </div>
  <div class="notice">このアプリは個人管理用の試作版です。FX会社の口座とは自動接続しません。単価・付与日数・実際の損益は取引報告書等で確認して入力してください。</div>
 </section>
-<footer>SWAP CALENDAR v11 · ローカル保存型</footer>
+<footer>SWAP CALENDAR v13 · ローカル保存型</footer>
 </main>
 <script>
 const KEY='swap-calendar-v3';
@@ -192,7 +192,7 @@ function opts(id,arr,keep=true){let old=$(id).value;$(id).innerHTML=arr.map(x=>`
 function initSelects(){['tradeBroker','settleBroker','rateBroker','dailyBroker'].forEach(id=>opts(id,db.brokers));['tradePair','settlePair','ratePair','multPair','quotePair','dailyPair'].forEach(id=>opts(id,db.pairs))}
 function holding(b,p,s,d){
  const base=db.openingPositions.filter(x=>x.broker===b&&x.pair===p&&x.side===s&&x.date<=d).reduce((a,x)=>a+x.qty,0);
- return base+db.trades.filter(t=>t.broker===b&&t.pair===p&&t.side===s&&t.date<=d).reduce((a,t)=>a+(t.action==='新規'?t.qty:-t.qty),0)
+ return base+db.trades.filter(t=>t.broker===b&&t.pair===p&&t.side===s&&t.date<=d).reduce((a,t)=>a+(t.action==='決済'?-t.qty:t.qty),0)
 }
 function rateAt(b,p,s,d){let r=db.rates.filter(x=>x.broker===b&&x.pair===p&&x.side===s&&x.date<=d).sort((a,b)=>b.date.localeCompare(a.date))[0];return r?Number(r.value):0}
 const tomorrow=()=>{let d=new Date(today()+'T12:00:00');d.setDate(d.getDate()+1);return d.toLocaleDateString('en-CA')};
@@ -262,20 +262,30 @@ function renderCalendar(){
  document.querySelectorAll('[data-del-daily]').forEach(b=>b.onclick=()=>{if(confirm('この日別実績を削除しますか？')){db.dailyEntries=db.dailyEntries.filter(e=>String(e.id)!==b.dataset.delDaily);save()}});
  syncMult();renderWeekendNote();
 }
+let editKey=null;
 function renderPositions(){
  let html='';
+ const editor=(q,base,avg,sw)=>`<div class="formgrid" style="margin-top:8px"><div><label>修正後の数量（通貨）</label><input type="number" id="posNewQty" step="1" value="${q}"></div><div><label>または増減（マイナス可）</label><div style="display:flex;gap:6px"><input type="number" id="posDelta" step="1" placeholder="例：-2000"><button type="button" class="secondary" id="posSign" style="padding:0 12px">±</button></div></div><div class="wide"><label>この日付から反映</label><input type="date" id="posDate" value="${today()}"></div><div class="wide row" style="gap:8px"><button id="posApply" style="flex:1">数量を反映</button><button class="secondary" id="posCancel" style="flex:1">キャンセル</button></div><div class="wide"><small class="muted">差分は「調整」として取引履歴に記録されます（損益は発生しません）。増減を入力した場合は、増減が優先されます。</small><div id="posError" class="negative"></div></div>${base.length?`<div class="wide" style="border-top:1px solid var(--line);padding-top:8px"><b>初期値の修正</b></div><div><label>初期平均レート</label><input type="number" id="posAvg" step="any" value="${avg===null?'':avg.toFixed(4)}"></div><div><label>初期累積スワップ（円）</label><input type="number" id="posSwap" step="1" value="${sw}"></div><div class="wide"><button id="posSaveInit" class="secondary" style="width:100%">初期値を保存</button><div id="posInitMsg" class="negative"></div></div>`:''}</div>`;
  for(let b of db.brokers)for(let p of db.pairs)for(let s of ['売り','買い']){
   let q=holding(b,p,s,today());if(q<=0)continue;
   const base=db.openingPositions.filter(x=>x.broker===b&&x.pair===p&&x.side===s&&x.date<=today());
   const baseQty=base.reduce((a,x)=>a+x.qty,0);
   const avg=baseQty?base.reduce((a,x)=>a+x.qty*x.avg,0)/baseQty:null;
   const sw=base.reduce((a,x)=>a+Number(x.openingSwap||0),0);
-  html+=`<div class="item"><div class="row"><span>${esc(b)} · ${esc(p)} · ${s}</span><strong>${q.toLocaleString()}通貨（${(q/1000).toLocaleString()}ロット）</strong></div><small class="muted">初期平均レート ${avg===null?'—':avg.toFixed(4)} · 初期累積スワップ ${money(sw)}</small></div>`;
+  const key=[b,p,s].join('|'),open=editKey===key;
+  html+=`<div class="item"><div class="row" style="align-items:center;gap:8px"><span><b>${esc(p)}</b> · ${s}<br><small class="muted">${esc(b)}</small></span><span style="text-align:right;margin-left:auto"><strong>${q.toLocaleString()}</strong><small class="muted"> 通貨</small><br><small class="muted">${(q/1000).toLocaleString()}ロット</small></span><button class="secondary" data-edit-pos="${esc(key)}" style="padding:6px 12px">${open?'閉じる':'修正'}</button></div><small class="muted">初期平均 ${avg===null?'—':avg.toFixed(4)} · 初期累積スワップ ${money(sw)}</small>${open?editor(q,base,avg,sw):''}</div>`;
  }
  $('positions').innerHTML=html||'<p class="muted">保有建玉はありません。</p>';
+ document.querySelectorAll('[data-edit-pos]').forEach(x=>x.onclick=()=>{editKey=editKey===x.dataset.editPos?null:x.dataset.editPos;renderPositions()});
+ if($('posApply')){
+  $('posSign').onclick=()=>{const v=$('posDelta').value;$('posDelta').value=v===''?'':String(-Number(v))};
+  $('posCancel').onclick=()=>{editKey=null;renderPositions()};
+  if($('posSaveInit'))$('posSaveInit').onclick=()=>{const [b,p,s]=editKey.split('|'),a=Number($('posAvg').value),w=Number($('posSwap').value),M=m=>{$('posInitMsg').textContent=m};if($('posAvg').value===''||!Number.isFinite(a)||a<=0||$('posSwap').value===''||!Number.isFinite(w)){M('平均レート（0より大きい値）と累積スワップを入力してください。');return}db.openingPositions.filter(x=>x.broker===b&&x.pair===p&&x.side===s&&x.date<=today()).forEach((x,i)=>{x.avg=a;x.openingSwap=i?0:w});editKey=null;save()};
+  $('posApply').onclick=()=>{const [b,p,s]=editKey.split('|'),date=$('posDate').value,E=m=>{$('posError').textContent=m};if(!date){E('日付を入力してください。');return}const before=holding(b,p,s,date),dv=$('posDelta').value,delta=dv!==''?Number(dv):Number($('posNewQty').value)-before;if(!Number.isFinite(delta)){E('数量を正しく入力してください。');return}if(delta===0){E('数量が変わっていません。');return}if(before+delta<0){E(`保有数量がマイナスになります（保有 ${before.toLocaleString()}通貨）。`);return}db.trades.push({id:Date.now(),broker:b,pair:p,side:s,action:'調整',date,qty:delta});editKey=null;save()};
+ }
 }
 function renderHistories(){
- $('tradeHistory').innerHTML=[...db.trades].sort((a,b)=>b.date.localeCompare(a.date)).map(t=>`<div class="item row"><span><b>${esc(t.pair)} ${t.side}・${t.action}</b><br><small class="muted">${esc(t.date)} · ${esc(t.broker)} · ${t.qty.toLocaleString()}通貨</small></span><button class="danger" data-del-trade="${t.id}">削除</button></div>`).join('')||'<p class="muted">取引履歴はありません。</p>';
+ $('tradeHistory').innerHTML=[...db.trades].sort((a,b)=>b.date.localeCompare(a.date)).map(t=>`<div class="item row"><span><b>${esc(t.pair)} ${t.side}・${t.action}</b><br><small class="muted">${esc(t.date)} · ${esc(t.broker)} · ${t.action==='調整'&&t.qty>0?'+':''}${t.qty.toLocaleString()}通貨</small></span><button class="danger" data-del-trade="${t.id}">削除</button></div>`).join('')||'<p class="muted">取引履歴はありません。</p>';
  $('settlementHistory').innerHTML=[...db.settlements].sort((a,b)=>b.date.localeCompare(a.date)).map(t=>`<div class="item"><div class="row"><b>${esc(t.pair)} ${esc(t.broker)}</b><strong class="${t.net>=0?'positive':'negative'}">${money(t.net)}</strong></div><small class="muted">${esc(t.date)} · ${t.qty.toLocaleString()}通貨</small><div class="muted">為替 ${money(t.fx)} + スワップ ${money(t.swap)}</div>${t.memo?`<small>${esc(t.memo)}</small>`:''}<button class="danger" data-del-settle="${t.id}" style="margin-top:6px">削除</button></div>`).join('')||'<p class="muted">決済履歴はありません。</p>';
  document.querySelectorAll('[data-del-trade]').forEach(b=>b.onclick=()=>{const id=b.dataset.delTrade,lk=db.settlements.find(s=>{const t=linkedTrade(s);return t&&String(t.id)===id});if(confirm(lk?'この決済取引を削除すると、対応する決済履歴も削除されます。よろしいですか？':'この取引履歴を削除しますか？保有数量と予測も変わります。')){db.trades=db.trades.filter(x=>String(x.id)!==id);if(lk)db.settlements=db.settlements.filter(s=>s!==lk);save()}});
  document.querySelectorAll('[data-del-settle]').forEach(b=>b.onclick=()=>{if(confirm('この決済履歴を削除しますか？対応する決済取引も削除され、保有数量が元に戻ります。')){const s=db.settlements.find(x=>String(x.id)===b.dataset.delSettle),t=s&&linkedTrade(s);if(t)db.trades=db.trades.filter(x=>x!==t);db.settlements=db.settlements.filter(x=>x!==s);save()}});
@@ -366,7 +376,8 @@ $('nextMonth').onclick=()=>{let d=new Date(currentMonth+'-01T12:00:00');d.setMon
 $('saveDailyEntry').onclick=()=>{let e={id:Date.now(),date:selectedDate,type:$('dailyType').value,broker:$('dailyBroker').value,pair:$('dailyPair').value,amount:Number($('dailyAmount').value),memo:$('dailyMemo').value.trim()};if(!$('dailyAmount').value.trim()||!Number.isFinite(e.amount)){alert('金額を入力してください。');return}if(e.type==='swap'){db.dailyEntries=db.dailyEntries.filter(x=>!(x.date===e.date&&x.type==='swap'&&x.broker===e.broker&&x.pair===e.pair));}db.dailyEntries.push(e);$('dailyAmount').value='';$('dailyMemo').value='';save()};
 $('saveMultiplier').onclick=()=>{let p=$('multPair').value,days=Number($('multiplier').value);db.multipliers=db.multipliers.filter(x=>!(x.date===selectedDate&&x.pair===p));if(days!==defaultDays(p,selectedDate))db.multipliers.push({date:selectedDate,pair:p,days});save()};
 $('multPair').onchange=syncMult;
-$('addTrade').onclick=()=>{let t={id:Date.now(),broker:$('tradeBroker').value,pair:$('tradePair').value,side:$('tradeSide').value,action:$('tradeAction').value,date:$('tradeDate').value,qty:Number($('tradeQty').value)};let before=holding(t.broker,t.pair,t.side,t.date);if(!t.date||!Number.isFinite(t.qty)||t.qty<=0){$('tradeError').textContent='日付と数量を正しく入力してください。';return}if(t.action==='決済'&&before<t.qty){$('tradeError').textContent=`決済数量が保有数量を超えています（保有 ${before.toLocaleString()}通貨）。`;return}db.trades.push(t);$('tradeError').textContent='登録しました。';$('tradeQty').value='';save()};
+$('addTrade').onclick=()=>{let t={id:Date.now(),broker:$('tradeBroker').value,pair:$('tradePair').value,side:$('tradeSide').value,action:$('tradeAction').value,date:$('tradeDate').value,qty:Number($('tradeQty').value)};let before=holding(t.broker,t.pair,t.side,t.date),E=m=>{$('tradeError').textContent=m};if(!t.date||$('tradeQty').value===''||!Number.isFinite(t.qty)||t.qty===0){E('日付と数量（0以外）を正しく入力してください。');return}if(t.action==='決済'){if(t.qty<0){E('決済数量はプラスで入力してください。');return}if(before<t.qty){E(`決済数量が保有数量を超えています（保有 ${before.toLocaleString()}通貨）。`);return}}else if(before+t.qty<0){E(`保有数量がマイナスになります（保有 ${before.toLocaleString()}通貨）。`);return}db.trades.push(t);$('tradeError').textContent='登録しました。';$('tradeQty').value='';save()};
+$('tradeQtySign').onclick=()=>{const v=$('tradeQty').value;$('tradeQty').value=v===''?'':String(-Number(v))};
 function updateSettlePreview(){$('settlePreview').textContent=money(Number($('fxPnl').value||0)+Number($('settleSwap').value||0))}
 ['fxPnl','settleSwap'].forEach(id=>$(id).oninput=updateSettlePreview);
 $('addSettlement').onclick=()=>{let s={id:Date.now(),broker:$('settleBroker').value,pair:$('settlePair').value,side:$('settleSide').value,date:$('settleDate').value,qty:Number($('settleQty').value),fx:Number($('fxPnl').value),swap:Number($('settleSwap').value),memo:$('settleMemo').value};let q=holding(s.broker,s.pair,s.side,s.date);if(!s.date||!s.qty||s.qty<=0||s.qty>q){$('settleError').textContent=`決済数量を確認してください。該当建玉の保有数量は ${q.toLocaleString()}通貨です。`;return}if(!Number.isFinite(s.fx)||!Number.isFinite(s.swap)){$('settleError').textContent='損益金額を確認してください。';return}let t={id:Date.now()+1,broker:s.broker,pair:s.pair,side:s.side,action:'決済',date:s.date,qty:s.qty};s.tradeId=t.id;db.trades.push(t);s.net=s.fx+s.swap;db.settlements.push(s);$('settleError').textContent='決済履歴と保有数量を更新しました。';$('settleQty').value='';$('fxPnl').value='';$('settleSwap').value='';save()};
