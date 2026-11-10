@@ -30,7 +30,7 @@ table{width:100%;border-collapse:collapse;font-size:13px}td,th{padding:9px 4px;b
 .hidden{display:none!important}.pill{display:inline-block;padding:4px 7px;border-radius:20px;background:#eef2f5;font-size:10px;color:#405363}
 .notice{background:#fff8e9;border:1px solid #f1dfb9;padding:10px;border-radius:10px;font-size:12px;color:#6b5425}
 footer{text-align:center;color:#7b8791;font-size:11px;padding:10px}
-button{touch-action:manipulation}.day{min-height:74px}.day .amt{font-size:11px;white-space:nowrap;overflow-wrap:normal;letter-spacing:-.02em}.fc{margin-left:3px;font-size:9px;font-weight:700;color:#9b6b14;background:#fff3d6;border-radius:4px;padding:0 3px}
+button{touch-action:manipulation}.day{min-height:74px}.day .amt{font-size:11px;white-space:nowrap;overflow-wrap:normal;letter-spacing:-.02em}.day{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}#selectedBreakdown .item{padding:6px 0;font-size:15px}.fc{margin-left:3px;font-size:9px;font-weight:700;color:#9b6b14;background:#fff3d6;border-radius:4px;padding:0 3px}
 @media(min-width:600px){main{padding:20px}.day{min-height:82px}.day .amt{font-size:12px}}
 </style>
 </head>
@@ -49,7 +49,7 @@ button{touch-action:manipulation}.day{min-height:74px}.day .amt{font-size:11px;w
   <div class="calendar-head"><button class="secondary" id="prevMonth">‹</button><strong id="monthTitle"></strong><button class="secondary" id="nextMonth">›</button></div>
   <div class="calendar" id="calendarGrid"></div>
   <div id="weekendNote" class="muted" style="margin-top:8px"></div>
-  <div class="muted" style="margin-top:8px">日付をタップすると、その日の付与日数と内訳を編集できます。</div>
+  <div class="muted" style="margin-top:8px">日付をタップで編集、長押しで内訳を表示します。予定日の金額は長押しで確認できます。</div>
  </div>
  <div class="card">
   <h2 id="selectedTitle">選択日の内訳</h2>
@@ -163,7 +163,7 @@ button{touch-action:manipulation}.day{min-height:74px}.day .amt{font-size:11px;w
  </div>
  <div class="notice">このアプリは個人管理用の試作版です。FX会社の口座とは自動接続しません。単価・付与日数・実際の損益は取引報告書等で確認して入力してください。</div>
 </section>
-<footer>SWAP CALENDAR v10 · ローカル保存型</footer>
+<footer>SWAP CALENDAR v11 · ローカル保存型</footer>
 </main>
 <script>
 const KEY='swap-calendar-v3';
@@ -201,6 +201,8 @@ function pickDate(m){return m===today().slice(0,7)?wkday(today(),-1):wkday(m+'-0
 // 付与日数の既定：土日0日／3日付与の曜日(既定は水曜・通貨ペア別に設定可)3日／その他1日。日別に登録した値が優先。
 function defaultDays(p,d){const w=new Date(d+'T12:00:00').getDay();if(w===0||w===6)return 0;return w===((db.tripleDay&&db.tripleDay[p])??3)?3:1}
 function multiplier(p,d){let x=db.multipliers.find(x=>x.pair===p&&x.date===d);return x?Number(x.days):defaultDays(p,d)}
+const peek=document.createElement('div');peek.style.cssText='display:none;position:fixed;left:12px;right:12px;bottom:calc(16px + env(safe-area-inset-bottom));z-index:30;background:#fff;border:1px solid #d9e0e5;border-radius:16px;padding:14px 16px;box-shadow:0 8px 30px rgba(0,0,0,.28);max-height:60vh;overflow:auto';peek.onclick=()=>{if(Date.now()-(peek._t||0)>400)peek.style.display='none'};document.body.appendChild(peek);
+function peekHTML(d){const fut=d>today(),rows=db.pairs.map(p=>({p,v:dailyPair(d,p)})).filter(x=>Math.round(x.v)).map(x=>`<div class="item row" style="padding:6px 0"><span>${esc(x.p)} <small class="muted">(${multiplier(x.p,d)}日)</small></span><strong class="${x.v<0?'negative':'swap-color'}">${money(x.v)}</strong></div>`).join(''),t=dailyTotal(d);return `<h3 style="margin:0 0 4px">${d}${fut?' の予定':' の内訳'}</h3><div class="big ${t<0?'negative':'positive'}">${money(t)}</div>${rows||'<p class="muted">スワップ・損益はありません。</p>'}<p class="muted" style="margin:8px 0 0">タップで閉じる</p>`}
 function actualDays(p,d){let m=multiplier(p,d);if(m===0&&!db.multipliers.some(x=>x.pair===p&&x.date===d))m=1;return m}
 function linkedTrade(s){return db.trades.find(t=>String(t.id)===String(s.tradeId))||db.trades.find(t=>t.action==='決済'&&t.broker===s.broker&&t.pair===s.pair&&t.side===s.side&&t.date===s.date&&t.qty===s.qty)}
 function allMonths(){const ds=[...db.openingPositions,...db.trades,...db.rates,...db.settlements,...db.dailyEntries].map(x=>x.date).filter(Boolean).sort();const t=today().slice(0,7);if(!ds.length)return [t];const out=[];let [y,m]=ds[0].slice(0,7).split('-').map(Number);const [ty,tm]=t.split('-').map(Number);while(y<ty||(y===ty&&m<=tm)){out.push(y+'-'+String(m).padStart(2,'0'));if(++m>12){m=1;y++}}return out}
@@ -250,11 +252,12 @@ document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>setTab(b.datase
 function renderCalendar(){
  let [y,m]=currentMonth.split('-').map(Number),first=(new Date(y,m-1,1).getDay()+6)%7,html=['月','火','水','木','金'].map(x=>`<div class="dow">${x}</div>`).join('');
  for(let i=0;i<(first>4?0:first);i++)html+='<div class="day empty"></div>';
- for(let i=1;i<=daysIn(currentMonth);i++){let wd=new Date(y,m-1,i).getDay();if(wd===0||wd===6)continue;let d=currentMonth+'-'+String(i).padStart(2,'0'),mult=db.multipliers.some(x=>x.date===d&&Number(x.days)!==defaultDays(x.pair,d)),v=dailyTotal(d);html+=`<button class="day ${d===selectedDate?'selected':''}" data-date="${d}"><span class="num">${i}${d>today()?'<small class="fc">予</small>':''}</span>${mult?`<span class="mult">付与変更</span>`:''}<span class="amt ${v<0?'negative':'positive'}">${(Math.round(v)||0).toLocaleString()}</span></button>`}
- $('calendarGrid').innerHTML=html;document.querySelectorAll('.day[data-date]').forEach(b=>b.onclick=()=>{selectedDate=b.dataset.date;render()});
+ for(let i=1;i<=daysIn(currentMonth);i++){let wd=new Date(y,m-1,i).getDay();if(wd===0||wd===6)continue;let d=currentMonth+'-'+String(i).padStart(2,'0'),mult=db.multipliers.some(x=>x.date===d&&Number(x.days)!==defaultDays(x.pair,d)),v=dailyTotal(d);html+=`<button class="day ${d===selectedDate?'selected':''}" data-date="${d}"><span class="num">${i}${d>today()?'<small class="fc">予</small>':''}</span>${mult?`<span class="mult">付与変更</span>`:''}${d>today()?'':`<span class="amt ${v<0?'negative':'positive'}">${(Math.round(v)||0).toLocaleString()}</span>`}</button>`}
+ $('calendarGrid').innerHTML=html;document.querySelectorAll('.day[data-date]').forEach(b=>{let tm=null,lp=false;const cn=()=>clearTimeout(tm);b.addEventListener('pointerdown',()=>{lp=false;cn();tm=setTimeout(()=>{lp=true;if(navigator.vibrate)navigator.vibrate(10);peek.innerHTML=peekHTML(b.dataset.date);peek.style.display='block';peek._t=Date.now()},450)});['pointerup','pointercancel','pointerleave','pointermove'].forEach(ev=>b.addEventListener(ev,cn));b.addEventListener('contextmenu',e=>e.preventDefault());b.onclick=()=>{if(lp){lp=false;return}selectedDate=b.dataset.date;render()}});
  $('monthTitle').textContent=`${y}年 ${m}月`;let total=dailyTotal(selectedDate);$('selectedTitle').textContent=selectedDate+' の内訳';$('selectedTotal').textContent=money(total);$('selectedTotal').className='big '+(total>=0?'positive':'negative');
- $('selectedBreakdown').innerHTML=db.pairs.map(p=>{let v=dailyPair(selectedDate,p);let actual=db.dailyEntries.some(e=>e.date===selectedDate&&e.type==='swap'&&e.pair===p);return `<div class="item row"><span>${esc(p)} <small class="muted">(${multiplier(p,selectedDate)}日${actual?'・実績×付与日数':''})</small></span><strong class="${v<0?'negative':'swap-color'}">${money(v)}</strong></div>`}).join('')+
+ $('selectedBreakdown').innerHTML=db.pairs.map(p=>({p,v:dailyPair(selectedDate,p)})).filter(x=>Math.round(x.v)).map(({p,v})=>{let actual=db.dailyEntries.some(e=>e.date===selectedDate&&e.type==='swap'&&e.pair===p);return `<div class="item row"><span>${esc(p)} <small class="muted">(${multiplier(p,selectedDate)}日${actual?'・実績':''})</small></span><strong class="${v<0?'negative':'swap-color'}">${money(v)}</strong></div>`}).join('')+
   ['fx','fee','other'].map(t=>{let v=dailyTypeTotal(selectedDate,t),label={fx:'為替差損益',fee:'手数料・調整額',other:'その他損益'}[t];return v?`<div class="item row"><span>${label}</span><strong class="${v<0?'negative':t==='fx'?'fx-color':'other-color'}">${money(v)}</strong></div>`:''}).join('');
+ if(!$('selectedBreakdown').innerHTML.trim())$('selectedBreakdown').innerHTML='<p class="muted">この日のスワップ・損益はありません。</p>';
  $('dailyEntryList').innerHTML=db.dailyEntries.filter(e=>e.date===selectedDate).map(e=>`<div class="item row"><span><b>${{swap:'スワップ実績',fx:'為替差損益',fee:'手数料・調整額',other:'その他損益'}[e.type]}</b><small class="muted" style="display:block">${esc(e.broker)}・${esc(e.pair)} ${e.memo?'・'+esc(e.memo):''}</small></span><span><strong class="${Number(e.amount)<0?'negative':e.type==='swap'?'swap-color':e.type==='fx'?'fx-color':'other-color'}">${money(Number(e.amount))}</strong><button class="danger" data-del-daily="${e.id}" style="margin-left:6px;padding:5px 8px">削除</button></span></div>`).join('')||'<p class="muted">この日の実績入力はありません。</p>';
  document.querySelectorAll('[data-del-daily]').forEach(b=>b.onclick=()=>{if(confirm('この日別実績を削除しますか？')){db.dailyEntries=db.dailyEntries.filter(e=>String(e.id)!==b.dataset.delDaily);save()}});
  syncMult();renderWeekendNote();
