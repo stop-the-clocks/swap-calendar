@@ -48,6 +48,7 @@ button{touch-action:manipulation}.day{min-height:74px}.day .amt{font-size:11px;w
 <section id="calendar" class="tab">
  <div class="card">
   <div class="calendar-head"><button class="secondary" id="prevMonth">‹</button><strong id="monthTitle"></strong><button class="secondary" id="nextMonth">›</button></div>
+  <div style="text-align:center;margin:-4px 0 8px"><button class="secondary" id="goToday" style="padding:4px 16px">今日</button></div>
   <div class="calendar" id="calendarGrid"></div>
   <div class="muted" style="margin-top:8px">日付をタップで編集、長押しで内訳を表示します。予定日の金額は長押しで確認できます。</div>
  </div>
@@ -125,14 +126,15 @@ button{touch-action:manipulation}.day{min-height:74px}.day .amt{font-size:11px;w
   </div><button id="addRate" style="width:100%;margin-top:10px">単価を登録</button><div id="rateHistory"></div>
  </div>
  <div class="card">
-  <h2>現在レートの更新（手動）</h2>
-  <div class="muted">レートは口座画面などで確認して手入力します。現時点では自動取得・FX会社とのAPI接続はありません。</div>
-  <div class="formgrid">
+  <h2>現在レートの自動取得・手動補正</h2>
+  <div class="notice" style="margin-bottom:10px">Live-Ratesの無料配信を利用します。無料枠は1時間3回までのため、通常は20分間隔で取得します。ヒロセ通商の公式レートではなく参考レートです。取得できない通貨ペアは自動計算せず、手動レートを利用します。</div>
+  <button id="fetchQuotes" style="width:100%">今すぐレートを取得</button><div id="quoteFetchStatus" class="muted" style="margin-top:7px">未取得</div>
+  <div class="formgrid" style="margin-top:10px">
    <div><label>通貨ペア</label><select id="quotePair"></select></div>
-   <div><label>現在レート</label><input type="number" id="quoteValue" step="0.000001" placeholder="例：61.4194"></div>
-   <div class="wide"><label>取得元・メモ</label><input id="quoteSource" placeholder="例：ヒロセ通商"></div>
+   <div><label>手動レート（仲値）</label><input type="number" id="quoteValue" step="0.000001" placeholder="例：61.4194"></div>
+   <div class="wide"><label>取得元・メモ</label><input id="quoteSource" placeholder="例：ヒロセ通商画面で確認"></div>
   </div>
-  <button id="saveQuote" style="width:100%;margin-top:10px">レートを更新</button><div id="quoteHistory"></div>
+  <button id="saveQuote" class="secondary" style="width:100%;margin-top:8px">手動レートを保存</button><div id="quoteHistory"></div>
  </div>
  <div class="card">
   <h2>証拠金管理（口座表示＋手入力）</h2>
@@ -159,13 +161,14 @@ button{touch-action:manipulation}.day{min-height:74px}.day .amt{font-size:11px;w
  <div class="card">
   <h2>データのバックアップ</h2><p class="muted">登録データはこのiPhoneのブラウザ内に保存します。定期的にJSONバックアップをダウンロードしてください。</p>
   <div class="grid2"><button id="exportData">バックアップ保存</button><button class="secondary" id="importButton">バックアップ復元</button></div><input type="file" id="importFile" accept=".json,application/json" class="hidden">
+<h3 style="margin-top:14px">自動保存（直近の履歴・この端末内）</h3><div id="snapList"></div>
   <button class="secondary" id="exportCsv" style="width:100%;margin-top:8px">取引履歴CSVを書き出す</button>
   <button class="danger" id="resetData" style="width:100%;margin-top:14px">全データを削除</button>
   <div id="backupMsg" class="muted"></div>
  </div>
  <div class="notice">このアプリは個人管理用の試作版です。FX会社の口座とは自動接続しません。単価・付与日数・実際の損益は取引報告書等で確認して入力してください。</div>
 </section>
-<footer>SWAP CALENDAR v14 · ローカル保存型</footer>
+<footer>SWAP CALENDAR v16 · ローカル保存型</footer>
 </main>
 <script>
 const KEY='swap-calendar-v3';
@@ -207,9 +210,40 @@ const peek=document.createElement('div');peek.style.cssText='display:none;positi
 function peekHTML(d){const fut=d>today(),rows=db.pairs.map(p=>({p,v:dailyPair(d,p)})).filter(x=>Math.round(x.v)).map(x=>`<div class="item row" style="padding:6px 0"><span>${esc(x.p)} <small class="muted">(${multiplier(x.p,d)}日)</small></span><strong class="${x.v<0?'negative':'swap-color'}">${money(x.v)}</strong></div>`).join(''),t=dailyTotal(d);return `<h3 style="margin:0 0 4px">${d}${fut?' の予定':' の内訳'}</h3><div class="big ${t<0?'negative':'positive'}">${money(t)}</div>${rows||'<p class="muted">スワップ・損益はありません。</p>'}<p class="muted" style="margin:8px 0 0">タップで閉じる</p>`}
 function actualSwap(b,p,d){const a=db.dailyEntries.filter(e=>e.date===d&&e.type==='swap'&&e.broker===b&&e.pair===p);return a.length?a.reduce((v,e)=>v+Number(e.amount||0)*(e.asTotal?1:actualDays(p,d)),0):null}
 function avgRate(b,p,s,d){let w=0,q=0;for(const x of db.openingPositions)if(x.broker===b&&x.pair===p&&x.side===s&&x.date<=d){q+=x.qty;w+=x.qty*x.avg}for(const t of db.trades)if(t.broker===b&&t.pair===p&&t.side===s&&t.action==='新規'&&t.date<=d&&t.qty>0&&t.rate>0){q+=t.qty;w+=t.qty*t.rate}return q?w/q:null}
-function quoteOf(pair){const x=db.quotes.find(q=>q.pair===pair);return x?Number(x.value):null}
-function toJPY(cur){return cur==='JPY'?1:quoteOf(cur+'/JPY')}
-function unrealized(b,p,s){const qty=holding(b,p,s,today()),avg=avgRate(b,p,s,today()),q=quoteOf(p);if(!qty||avg===null||q===null)return null;const c=toJPY(p.split('/')[1]);if(c===null)return null;return (s==='売り'?avg-q:q-avg)*qty*c}
+function quoteOf(pair,side='mid'){const x=db.quotes.find(q=>q.pair===pair);if(!x)return null;const v=side==='bid'?x.bid:side==='ask'?x.ask:null;return Number.isFinite(Number(v))&&Number(v)>0?Number(v):(Number.isFinite(Number(x.value))&&Number(x.value)>0?Number(x.value):null)}
+function toJPY(cur,amount){if(cur==='JPY')return 1;const x=db.quotes.find(q=>q.pair===cur+'/JPY');if(!x)return null;const v=amount>=0?x.bid:x.ask;return Number.isFinite(Number(v))&&Number(v)>0?Number(v):quoteOf(cur+'/JPY')}
+function unrealized(b,p,s){const qty=holding(b,p,s,today()),avg=avgRate(b,p,s,today()),exit=quoteOf(p,s==='売り'?'ask':'bid');if(!qty||avg===null||exit===null)return null;const quotePnl=(s==='売り'?avg-exit:exit-avg)*qty;const c=toJPY(p.split('/')[1],quotePnl);if(c===null)return null;return quotePnl*c}
+function whyNoEval(b,p,s){if(!holding(b,p,s,today()))return '';if(avgRate(b,p,s,today())===null)return '平均レート不明';if(quoteOf(p,s==='売り'?'ask':'bid')===null)return `${p}の現在レート未登録`;const c=p.split('/')[1];if(c&&c!=='JPY'&&!db.quotes.some(q=>q.pair===c+'/JPY'))return `${c}/JPYの現在レート未登録`;return ''}
+function qtime(){return db.quoteFetch?.lastSuccess?' · 自動取得 '+new Date(db.quoteFetch.lastSuccess).toLocaleString('ja-JP',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}):''}
+const SNAP='swap-calendar-snap-';
+function snapKeys(){const ks=[];try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith(SNAP))ks.push(k)}}catch{}return ks.sort().reverse()}
+function takeSnapshot(force){try{const k=SNAP+today()+(force?'~操作前':'');if(!force&&localStorage.getItem(k))return;localStorage.setItem(k,JSON.stringify(db));snapKeys().slice(8).forEach(x=>localStorage.removeItem(x))}catch{}}
+const LIVE_RATES_URL='https://www.live-rates.com/rates';
+const LIVE_RATES_INTERVAL=20*60*1000;
+function pairKey(v){return String(v||'').replace('/','').toUpperCase()}
+async function fetchLiveQuotes(manual=false){
+ const status=$('quoteFetchStatus'),btn=$('fetchQuotes');if(!status||!btn)return;
+ const last=Number(db.quoteFetch?.lastAttempt||0);if(Date.now()-last<LIVE_RATES_INTERVAL){status.textContent=`無料枠保護のため取得間隔を20分以上空けます。次回目安 ${new Date(last+LIVE_RATES_INTERVAL).toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'})}`;return}
+ btn.disabled=true;status.textContent='レートを取得しています…';let okRender=false;
+ try{
+  const res=await fetch(LIVE_RATES_URL,{cache:'no-store'});if(!res.ok)throw new Error(res.status===503?'無料枠の上限に達しました（1時間3回まで）。':'配信元に接続できませんでした。');
+  const data=await res.json();if(!Array.isArray(data))throw new Error('配信データの形式を確認できません。');
+  const map=new Map(data.map(x=>[pairKey(x.currency),x]));let updated=0,missing=[];const stamp=new Date().toLocaleString('ja-JP');
+  for(const pair of db.pairs){const x=map.get(pairKey(pair));if(!x)continue;
+   const bid=Number(x.bid??x.rate),ask=Number(x.ask??x.rate),ts=Number(x.timestamp);if(!(bid>0&&ask>0))continue;
+   const old=db.quotes.find(q=>q.pair===pair);const quote={...(old||{}),pair,bid,ask,value:(bid+ask)/2,source:'Live-Rates（参考・Bid/Ask）',updated:stamp,providerTimestamp:Number.isFinite(ts)&&ts>0?new Date(ts).toISOString():null};
+   db.quotes=db.quotes.filter(q=>q.pair!==pair);db.quotes.push(quote);updated++;
+  }
+  const need=new Set();for(const b of db.brokers)for(const p of db.pairs)for(const sd of ['売り','買い'])if(holding(b,p,sd,today())>0){need.add(p);const c=p.split('/')[1];if(c&&c!=='JPY')need.add(c+'/JPY')}
+  missing=[...need].filter(p=>!map.has(pairKey(p))&&!db.quotes.some(q=>q.pair===p));
+  db.quoteFetch={lastAttempt:Date.now(),lastSuccess:Date.now(),source:'Live-Rates',updated,missing};try{localStorage.setItem(KEY,JSON.stringify(db))}catch{}
+  status.textContent=`取得成功：${updated}ペア／${stamp}。手動レートが必要：${missing.length?missing.join('、'):'なし'}`;
+  okRender=true;
+ }catch(e){db.quoteFetch={...(db.quoteFetch||{}),lastAttempt:Date.now(),error:String(e.message||e)};try{localStorage.setItem(KEY,JSON.stringify(db))}catch{}const m=e instanceof TypeError?'通信できません（オフライン、または配信元がブラウザからの直接取得を許可していません）。':(e.message||e);status.textContent=`取得できません：${m} 前回のレートは保持しています。`;}
+ finally{btn.disabled=false;if(okRender&&!editKey&&!editTradeId&&!editRate&&!/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement?.tagName||''))render()}
+}
+function maybeAutoFetch(){const last=Number(db.quoteFetch?.lastAttempt||0);if(Date.now()-last>=LIVE_RATES_INTERVAL)fetchLiveQuotes(false);else if($('quoteFetchStatus'))$('quoteFetchStatus').textContent=`次回自動取得の目安：${new Date(last+LIVE_RATES_INTERVAL).toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'})}（無料枠に配慮）`}
+
 function markBackup(){try{localStorage.setItem('swap-calendar-lastbackup',String(Date.now()))}catch{}renderBackupBanner()}
 function renderBackupBanner(){const el=$('backupBanner');if(!el)return;let lb=0;try{lb=Number(localStorage.getItem('swap-calendar-lastbackup')||0)}catch{}const days=lb?Math.floor((Date.now()-lb)/864e5):null;if(days!==null&&days<30){el.style.display='none';return}el.style.display='flex';el.innerHTML=`<span>${days===null?'まだバックアップを保存していません。':`前回のバックアップから${days}日経っています。`}</span><button id="bannerBackup" style="padding:6px 14px">保存</button>`;$('bannerBackup').onclick=()=>$('exportData').click()}
 if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(()=>{});
@@ -284,9 +318,9 @@ function renderPositions(){
   const avg=baseQty?base.reduce((a,x)=>a+x.qty*x.avg,0)/baseQty:null;
   const sw=base.reduce((a,x)=>a+Number(x.openingSwap||0),0);
   const key=[b,p,s].join('|'),open=editKey===key,u=unrealized(b,p,s);if(u!==null){totU+=u;anyU=true}
-  html+=`<div class="item"><div class="row" style="align-items:center;gap:8px"><span><b>${esc(p)}</b> · ${s}<br><small class="muted">${esc(b)}</small></span><span style="text-align:right;margin-left:auto"><strong>${q.toLocaleString()}</strong><small class="muted"> 通貨</small><br><small class="muted">${(q/1000).toLocaleString()}ロット</small>${u===null?'':`<br><small class="${u<0?'negative':'positive'}">評価 ${money(u)}</small>`}</span><button class="secondary" data-edit-pos="${esc(key)}" style="padding:6px 12px">${open?'閉じる':'修正'}</button></div><small class="muted">初期平均 ${avg===null?'—':avg.toFixed(4)} · 初期累積スワップ ${money(sw)}</small>${open?editor(q,base,avg,sw):''}</div>`;
+  html+=`<div class="item"><div class="row" style="align-items:center;gap:8px"><span><b>${esc(p)}</b> · ${s}<br><small class="muted">${esc(b)}</small></span><span style="text-align:right;margin-left:auto"><strong>${q.toLocaleString()}</strong><small class="muted"> 通貨</small><br><small class="muted">${(q/1000).toLocaleString()}ロット</small>${u===null?`<br><small class="muted">${esc(whyNoEval(b,p,s))}</small>`:`<br><small class="${u<0?'negative':'positive'}">評価 ${money(u)}</small>`}</span><button class="secondary" data-edit-pos="${esc(key)}" style="padding:6px 12px">${open?'閉じる':'修正'}</button></div><small class="muted">初期平均 ${avg===null?'—':avg.toFixed(4)} · 初期累積スワップ ${money(sw)}</small>${open?editor(q,base,avg,sw):''}</div>`;
  }
- $('positions').innerHTML=(anyU?`<div class="item row"><span>評価損益合計<br><small class="muted">現在レート基準（約定レート未入力分は平均レートで評価）</small></span><strong class="${totU<0?'negative':'positive'}">${money(totU)}</strong></div>`:'')+(html||'<p class="muted">保有建玉はありません。</p>');
+ $('positions').innerHTML=(anyU?`<div class="item row"><span>評価損益合計<br><small class="muted">現在レート基準（約定レート未入力分は平均レートで評価）${qtime()}</small></span><strong class="${totU<0?'negative':'positive'}">${money(totU)}</strong></div>`:'')+(html||'<p class="muted">保有建玉はありません。</p>');
  document.querySelectorAll('[data-edit-pos]').forEach(x=>x.onclick=()=>{editKey=editKey===x.dataset.editPos?null:x.dataset.editPos;renderPositions()});
  if($('posApply')){
   $('posSign').onclick=()=>{const v=$('posDelta').value;$('posDelta').value=v===''?'':String(-Number(v))};
@@ -372,9 +406,11 @@ function renderSettings(){
  $('pairList').innerHTML=db.pairs.map(p=>`<div class="item row"><span>${esc(p)}</span><span class="muted">3日付与 <select data-triple="${esc(p)}" style="width:auto;padding:6px">${['月','火','水','木','金'].map((n,i)=>`<option value="${i+1}" ${((db.tripleDay[p]??3)===i+1)?'selected':''}>${n}</option>`).join('')}</select><button class="danger" data-del-pair="${esc(p)}" style="margin-left:6px;padding:5px 8px">削除</button></span></div>`).join('')+'<div class="muted" style="margin-top:6px">3日付与の曜日は通貨ペアごとに設定できます（既定は水曜）。祝日などで変わる日は、カレンダーで日別に付与日数を登録してください。</div>';document.querySelectorAll('[data-triple]').forEach(x=>x.onchange=()=>{db.tripleDay[x.dataset.triple]=Number(x.value);save()});
  document.querySelectorAll('[data-del-pair]').forEach(x=>x.onclick=()=>{const v=x.dataset.delPair;if(db.pairs.length<=1){alert('最後の1通貨ペアは削除できません。');return}if(inUse('pair',v)||db.multipliers.some(y=>y.pair===v)){alert('この通貨ペアは取引・単価・実績で使われているため削除できません。');return}if(confirm('この通貨ペアを削除しますか？（登録済みの現在レートも削除されます）')){db.pairs=db.pairs.filter(y=>y!==v);db.quotes=db.quotes.filter(q=>q.pair!==v);delete db.tripleDay[v];save()}});
  (()=>{const rs=[...db.rates].sort((a,b)=>b.date.localeCompare(a.date));$('rateHistory').innerHTML='<h3 style="margin-top:14px">登録済み単価</h3>'+rs.map((r,i)=>`<div class="item"><div class="row"><span>${esc(r.broker)} · ${esc(r.pair)} · ${r.side}<br><small class="muted">${r.date}以降</small></span><span><b>${money(r.value)}</b> <button class="secondary" data-edit-rate="${i}" style="padding:5px 8px">${editRate===r?'閉じる':'編集'}</button> <button class="danger" data-del-rate="${i}" style="padding:5px 8px">削除</button></span></div>${editRate===r?`<div class="formgrid" style="margin-top:8px"><div><label>適用開始日</label><input type="date" id="erDate" value="${esc(r.date)}"></div><div><label>単価（円）</label><input type="number" id="erValue" step="any" value="${r.value}"></div><div class="wide"><button id="erSave" style="width:100%">変更を保存</button><div id="erErr" class="negative"></div></div></div>`:''}</div>`).join('');document.querySelectorAll('[data-del-rate]').forEach(b=>b.onclick=()=>{if(confirm('この単価を削除しますか？')){db.rates=db.rates.filter(x=>x!==rs[Number(b.dataset.delRate)]);editRate=null;save()}});document.querySelectorAll('[data-edit-rate]').forEach(b=>b.onclick=()=>{const r=rs[Number(b.dataset.editRate)];editRate=editRate===r?null:r;renderSettings()});if($('erSave'))$('erSave').onclick=()=>{const d=$('erDate').value,v=Number($('erValue').value);if(!d||$('erValue').value===''||!Number.isFinite(v)){$('erErr').textContent='日付と単価を入力してください。';return}editRate.date=d;editRate.value=v;editRate=null;save()}})();
- $('quoteHistory').innerHTML='<h3 style="margin-top:14px">現在の登録レート</h3>'+db.quotes.map(q=>`<div class="item row"><span>${esc(q.pair)}<br><small class="muted">${esc(q.source||'手動入力')} · ${esc(q.updated)}</small></span><span><b>${Number(q.value).toLocaleString('ja-JP',{maximumFractionDigits:6})}</b><button class="danger" data-del-quote="${esc(q.pair)}" style="margin-left:6px;padding:5px 8px">削除</button></span></div>`).join('')||'<p class="muted">レート未登録</p>';document.querySelectorAll('[data-del-quote]').forEach(x=>x.onclick=()=>{if(confirm('このレートを削除しますか？')){db.quotes=db.quotes.filter(q=>q.pair!==x.dataset.delQuote);save()}});
+ $('quoteHistory').innerHTML='<h3 style="margin-top:14px">登録レート（Bid / Ask）</h3>'+db.quotes.map(q=>`<div class="item row"><span>${esc(q.pair)}<br><small class="muted">${esc(q.source||'手動入力')} · ${esc(q.updated||'')}</small></span><span style="text-align:right"><b>${q.bid&&q.ask?Number(q.bid).toLocaleString('ja-JP',{maximumFractionDigits:6})+' / '+Number(q.ask).toLocaleString('ja-JP',{maximumFractionDigits:6}):Number(q.value).toLocaleString('ja-JP',{maximumFractionDigits:6})}</b><button class="danger" data-del-quote="${esc(q.pair)}" style="margin-left:6px;padding:5px 8px">削除</button></span></div>`).join('')||'<p class="muted">レート未登録</p>';document.querySelectorAll('[data-del-quote]').forEach(x=>x.onclick=()=>{if(confirm('このレートを削除しますか？')){db.quotes=db.quotes.filter(q=>q.pair!==x.dataset.delQuote);save()}});
  $('marginDeposit').value=db.margin.deposit??0;$('marginEquity').value=db.margin.equity??0;$('marginRequired').value=db.margin.required??0;$('marginOrder').value=db.margin.order??0;$('marginFloating').value=db.margin.floating??0;$('marginLeverage').value=db.margin.leverage??25;
- $('marginAsOf').textContent=db.margin.asOf||'—';const ratio=Number(db.margin.required)>0?Number(db.margin.equity)/Number(db.margin.required)*100:null;
+ $('marginAsOf').textContent=db.margin.asOf||'—';
+ $('snapList').innerHTML=snapKeys().map(k=>`<div class="item row"><span>${esc(k.slice(SNAP.length))}<br><small class="muted">${Math.round((localStorage.getItem(k)||'').length/1024)}KB</small></span><button class="secondary" data-restore-snap="${esc(k)}" style="padding:5px 12px">復元</button></div>`).join('')||'<p class="muted">まだありません（毎日初回起動時に自動で保存されます）。</p>';
+ document.querySelectorAll('[data-restore-snap]').forEach(x=>x.onclick=()=>{if(!confirm('この時点のデータに戻します。現在のデータは「操作前」として自動保存されます。よろしいですか？'))return;try{const d=normalize(JSON.parse(localStorage.getItem(x.dataset.restoreSnap)));takeSnapshot(true);db=d;save()}catch{alert('復元できませんでした。')}});const ratio=Number(db.margin.required)>0?Number(db.margin.equity)/Number(db.margin.required)*100:null;
  $('marginRatio').textContent=ratio===null?'—':ratio.toFixed(2)+'%';
  $('marginAvailable').textContent=money(Number(db.margin.equity||0)-Number(db.margin.required||0)-Number(db.margin.order||0));
  const equityCheck=Number(db.margin.deposit||0)+Number(db.margin.floating||0);
@@ -400,7 +436,8 @@ $('addSettlement').onclick=()=>{let s={id:Date.now(),broker:$('settleBroker').va
 $('addRate').onclick=()=>{let r={broker:$('rateBroker').value,pair:$('ratePair').value,side:$('rateSide').value,date:$('rateDate').value,value:Number($('rateValue').value)};if(!r.date||$('rateValue').value.trim()===''||!Number.isFinite(r.value))return alert('日付と単価を入力してください。');db.rates=db.rates.filter(x=>!(x.broker===r.broker&&x.pair===r.pair&&x.side===r.side&&x.date===r.date));db.rates.push(r);save()};
 $('addBroker').onclick=()=>{let v=$('newBroker').value.trim();if(v&&!db.brokers.includes(v)){db.brokers.push(v);$('newBroker').value='';save()}else if(db.brokers.includes(v)){alert('同じ口座名が登録済みです。メイン・サブなど区別できる名前にしてください。')}};
 $('addPair').onclick=()=>{let v=$('newPair').value.trim().toUpperCase();if(v&&!db.pairs.includes(v)){db.pairs.push(v);$('newPair').value='';save()}};
-$('saveQuote').onclick=()=>{let pair=$('quotePair').value,value=Number($('quoteValue').value),source=$('quoteSource').value.trim();if(!pair||!$('quoteValue').value.trim()||!Number.isFinite(value)||value<=0){alert('通貨ペアと正しいレートを入力してください。');return}let updated=new Date().toLocaleString('ja-JP');db.quotes=db.quotes.filter(q=>q.pair!==pair);db.quotes.push({pair,value,source,updated});$('quoteValue').value='';save()};
+$('fetchQuotes').onclick=()=>fetchLiveQuotes(true);
+$('saveQuote').onclick=()=>{let pair=$('quotePair').value,value=Number($('quoteValue').value),source=$('quoteSource').value.trim();if(!pair||!$('quoteValue').value.trim()||!Number.isFinite(value)||value<=0){alert('通貨ペアと正しいレートを入力してください。');return}let updated=new Date().toLocaleString('ja-JP');db.quotes=db.quotes.filter(q=>q.pair!==pair);db.quotes.push({pair,value,source:source||'手動入力（仲値）',updated});$('quoteValue').value='';save()};
 $('saveMargin').onclick=()=>{
  let deposit=Number($('marginDeposit').value||0),equity=Number($('marginEquity').value||0),required=Number($('marginRequired').value||0),order=Number($('marginOrder').value||0),floating=Number($('marginFloating').value||0),leverage=Number($('marginLeverage').value||25);
  if([deposit,equity,required,order,floating,leverage].some(x=>!Number.isFinite(x))||[deposit,equity,required,order,leverage].some(x=>x<0)||leverage<=0){alert('証拠金・レバレッジの入力値を確認してください。');return}
@@ -409,13 +446,17 @@ $('saveMargin').onclick=()=>{
 $('analysisYear').innerHTML=Array.from({length:11},(_,i)=>new Date().getFullYear()-5+i).map(y=>`<option>${y}</option>`).join('');$('analysisYear').value=new Date().getFullYear();
 $('analysisYear').onchange=renderAnalysis;$('analysisPeriod').onchange=renderAnalysis;
 $('exportData').onclick=()=>download('swap-calendar-backup-'+today()+'.json',JSON.stringify(db,null,2),'application/json',markBackup);
+$('goToday').onclick=()=>{currentMonth=today().slice(0,7);selectedDate=pickDate(currentMonth);render()};
 $('importButton').onclick=()=>$('importFile').click();
-$('importFile').onchange=async e=>{try{let f=e.target.files[0];e.target.value='';let data=JSON.parse(await f.text());if(!Array.isArray(data.trades)||!Array.isArray(data.brokers))throw Error();if(confirm('現在のデータをバックアップ内容で置き換えますか？')){db=normalize(data);save();$('backupMsg').textContent='復元しました。'}}catch{$('backupMsg').textContent='バックアップファイルを読み込めませんでした。'}};
+$('importFile').onchange=async e=>{try{let f=e.target.files[0];e.target.value='';let data=JSON.parse(await f.text());if(!Array.isArray(data.trades)||!Array.isArray(data.brokers))throw Error();if(confirm('現在のデータをバックアップ内容で置き換えますか？')){takeSnapshot(true);db=normalize(data);save();$('backupMsg').textContent='復元しました。'}}catch{$('backupMsg').textContent='バックアップファイルを読み込めませんでした。'}};
 $('exportCsv').onclick=()=>{let rows=[['date','broker','pair','side','action','quantity'],...db.trades.map(t=>[t.date,t.broker,t.pair,t.side,t.action,t.qty])];download('swap-trades-'+today()+'.csv','\ufeff'+rows.map(r=>r.map(x=>'"'+String(x).replace(/"/g,'""')+'"').join(',')).join('\r\n'),'text/csv')};
-$('resetData').onclick=()=>{if(confirm('全ての取引・単価・決済・設定を削除します。この操作は取り消せません。先にバックアップしましたか？')){db=initial();save()}};
+$('resetData').onclick=()=>{if(confirm('全ての取引・単価・決済・設定を削除します。この操作は取り消せません。先にバックアップしましたか？')){takeSnapshot(true);db=initial();save()}};
 function download(name,data,type,onok){const blob=new Blob([data],{type});const f=window.File&&new File([blob],name,{type});if(f&&navigator.canShare&&navigator.canShare({files:[f]})){navigator.share({files:[f],title:name}).then(()=>onok&&onok()).catch(()=>{});return}let a=document.createElement('a'),url=URL.createObjectURL(blob);a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),4000);onok&&onok()}
 ['tradeDate','settleDate','rateDate'].forEach(id=>$(id).value=today());
+takeSnapshot();
 render();
+maybeAutoFetch();
+setInterval(()=>{if(document.visibilityState==='visible')maybeAutoFetch()},60*1000);
 if('serviceWorker'in navigator&&location.protocol.startsWith('http')){const had=!!navigator.serviceWorker.controller;let rl=false;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(had&&!rl){rl=true;location.reload()}});navigator.serviceWorker.register('./sw.js').then(r=>r.update()).catch(()=>{})}
 </script>
 </body></html>
