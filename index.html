@@ -163,7 +163,7 @@ button{touch-action:manipulation}.day{min-height:74px}.day .amt{font-size:11px;w
  </div>
  <div class="notice">このアプリは個人管理用の試作版です。FX会社の口座とは自動接続しません。単価・付与日数・実際の損益は取引報告書等で確認して入力してください。</div>
 </section>
-<footer>SWAP CALENDAR · ローカル保存型</footer>
+<footer>SWAP CALENDAR v10 · ローカル保存型</footer>
 </main>
 <script>
 const KEY='swap-calendar-v3';
@@ -386,6 +386,6 @@ $('resetData').onclick=()=>{if(confirm('全ての取引・単価・決済・設�
 function download(name,data,type){const blob=new Blob([data],{type});const f=window.File&&new File([blob],name,{type});if(f&&navigator.canShare&&navigator.canShare({files:[f]})){navigator.share({files:[f],title:name}).catch(()=>{});return}let a=document.createElement('a'),url=URL.createObjectURL(blob);a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),4000)}
 ['tradeDate','settleDate','rateDate'].forEach(id=>$(id).value=today());
 render();
-if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').then(r=>r.update()).catch(()=>{});
+if('serviceWorker'in navigator&&location.protocol.startsWith('http')){const had=!!navigator.serviceWorker.controller;let rl=false;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(had&&!rl){rl=true;location.reload()}});navigator.serviceWorker.register('./sw.js').then(r=>r.update()).catch(()=>{})}
 </script>
 </body></html>
