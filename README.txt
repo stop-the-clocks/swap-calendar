@@ -1,3 +1,10 @@
+SWAP CALENDAR v22 アイコン更新版（アプリ機能はv22のまま）
+
+新しい青色のSWAP CALENDAR画像をアイコンに採用。
+index.html / sw.js / manifest.webmanifest / icon.svg / icon-192.png / icon-512.png / icon-maskable-512.png / apple-touch-icon.png をGitHubリポジトリのルートへ上書きしてください。
+保存キー swap-calendar-v3 は変更していません。
+ホーム画面のアイコンが変わらない場合は、バックアップ確認後にホーム画面のショートカットのみ削除し、Safariから再度ホーム画面に追加してください。ブラウザのWebサイトデータは削除しないでください。
+
 SWAP CALENDAR v22
 
 【v22の変更】
