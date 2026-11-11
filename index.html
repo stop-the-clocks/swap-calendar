@@ -43,6 +43,48 @@ main{padding:8px}.card{padding:11px;margin:0 0 8px;border-radius:13px}h2{font-si
 .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;background:#9aa7b2}.d-swap{background:var(--teal)}.d-gain{background:var(--blue)}.d-all{background:var(--gold)}.sub{margin-left:12px;padding-left:8px;border-left:2px solid var(--line)}
 .acct{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-top:9px}.acct .k{background:#1b3144;border-radius:9px;padding:5px 6px;border-top:3px solid #5b7184}.acct small{display:block;font-size:10px;color:#b9c7d2;white-space:nowrap}.acct b{font-size:12.5px;color:#fff;white-space:nowrap}.acct .r-ok{border-top-color:#2ecc9a}.acct .r-warn{border-top-color:#f1c40f}.acct .r-bad{border-top-color:#ff6b6b}.acct-note{grid-column:1/-1;font-size:10px;color:#9fb0bd}
 @media(min-width:600px){main{padding:20px}.day{min-height:82px}.day .amt{font-size:12px}}
+
+/* v23: readability and alignment refinement */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;scroll-behavior:smooth}
+body{line-height:1.55;letter-spacing:.01em;overflow-wrap:anywhere}
+main{width:100%;min-width:0}
+.card{padding:clamp(12px,3.5vw,18px);overflow:hidden}
+h1,h2,h3,p,label,small{overflow-wrap:anywhere}
+h2{line-height:1.4;letter-spacing:0}
+.muted{line-height:1.55}
+button{min-height:42px;line-height:1.35;white-space:normal}
+input,select,textarea{font-size:16px;line-height:1.35;min-height:42px}
+input[type=number]{font-variant-numeric:tabular-nums;text-align:right}
+.formgrid{align-items:start;gap:10px}
+.formgrid>div{min-width:0}
+.formgrid label{min-height:2.6em;line-height:1.35;margin:4px 0 6px}
+.formgrid input,.formgrid select{min-height:44px;padding:10px 9px}
+.item{min-width:0;gap:10px;padding:10px 0}
+.item.row{align-items:center;flex-wrap:wrap}
+.item.row>span,.item.row>label{min-width:0;flex:1 1 130px}
+.item.row>input[type=number]{flex:0 1 145px;max-width:48%;min-width:105px}
+.stat{min-width:0}
+.stat strong{overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+.negative,.positive{overflow-wrap:anywhere}
+#ocrPreview .item.row{display:grid;grid-template-columns:minmax(0,1fr) minmax(110px,145px);gap:10px}
+#ocrPreview .item.row label{min-width:0;line-height:1.4}
+#ocrPreview .item.row input[type=number]{width:100%!important;max-width:none;min-width:0}
+#ocrPreview input[type=checkbox]{width:20px;height:20px;min-height:20px;flex:0 0 auto}
+#marginCheck,#marginExtra{line-height:1.6;overflow-wrap:anywhere}
+@media(max-width:380px){
+ main{padding:9px}
+ nav{gap:4px;padding-left:6px;padding-right:6px}
+ nav button{font-size:11px;padding:9px 2px}
+ .formgrid{gap:8px}
+ .formgrid label{font-size:11px}
+ .grid2{gap:7px}
+ .stat{padding:9px}
+ .stat strong{font-size:15px}
+}
+@media(min-width:600px){
+ .formgrid{gap:12px}
+ .formgrid label{min-height:0}
+}
 </style>
 </head>
 <body>
@@ -191,7 +233,7 @@ main{padding:8px}.card{padding:11px;margin:0 0 8px;border-radius:13px}h2{font-si
  </div>
  <div class="notice">このアプリは個人管理用の試作版です。FX会社の口座とは自動接続しません。単価・付与日数・実際の損益は取引報告書等で確認して入力してください。</div>
 </section>
-<footer>SWAP CALENDAR v22 · ローカル保存型</footer>
+<footer>SWAP CALENDAR v23 · ローカル保存型</footer>
 </main>
 <script>
 const KEY='swap-calendar-v3';
@@ -343,7 +385,14 @@ function marginValues(text){return normText(text).split(/\n/).map(l=>(l.match(NU
 function mapMargin(a){return {deposit:a[0],equity:a[1],required:a[2],order:a[3],floating:a[4],ratio:a[6],available:a[7],withdrawable:a[8],positionPnl:a[10],unrealizedSwap:a[12],alertLevel:a[14],losscut:a[15],leverage:a[16]}}
 function marginScore(a){let s=0;if(Math.abs(a[0]+a[4]-a[1])<=2)s+=3;if(a[2]>0&&Math.abs(a[1]/a[2]*100-a[6])<=0.6)s+=3;if(a[4]===a[5])s++;if(a[10]===a[11])s++;if(a[12]===a[13])s++;if(a[15]===a[2])s++;if(a[14]>a[2])s++;return s}
 function parseMarginOrder(text){const v=marginValues(text);if(v.length<17)return null;let best=null,bs=-1;for(let i=0;i+17<=v.length;i++){const w=v.slice(i,i+17),sc=marginScore(w);if(sc>bs){bs=sc;best=w}}return mapMargin(best)}
-function marginWarnings(m){const w=[];if(m.deposit!=null&&m.floating!=null&&m.equity!=null&&Math.abs(m.deposit+m.floating-m.equity)>2)w.push('有効証拠金が「預託証拠金＋評価損益」と一致しません（読み取り違いの可能性）');if(m.equity!=null&&m.required>0&&m.ratio!=null&&Math.abs(m.equity/m.required*100-m.ratio)>0.6)w.push('有効比率が計算値と一致しません（読み取り違いの可能性）');return w}
+function marginWarnings(m){
+ const w=[];
+ const close=(a,b,t=2)=>Number.isFinite(Number(a))&&Number.isFinite(Number(b))&&Math.abs(Number(a)-Number(b))<=t;
+ if(m.deposit!=null&&m.floating!=null&&m.equity!=null&&!close(Number(m.deposit)+Number(m.floating),m.equity))w.push(`有効証拠金が不一致です。預託証拠金＋評価損益の計算値は ${money(Number(m.deposit)+Number(m.floating))} 円です`);
+ if(m.positionPnl!=null&&m.unrealizedSwap!=null&&m.floating!=null&&!close(Number(m.positionPnl)+Number(m.unrealizedSwap),m.floating))w.push(`評価損益が不一致です。ポジション損益＋未実現スワップの計算値は ${money(Number(m.positionPnl)+Number(m.unrealizedSwap))} 円です`);
+ if(m.equity!=null&&Number(m.required)>0&&m.ratio!=null&&!close(Number(m.equity)/Number(m.required)*100,m.ratio,0.6))w.push(`有効比率が不一致です。計算値は ${(Number(m.equity)/Number(m.required)*100).toFixed(2)}% です`);
+ return w
+}
 function parseRatesText(text){const t=normText(text).replace(/[▲▼△▽]/g,' '),re=/\b([A-Z]{3})\s*\/\s*([A-Z]{3})\b/g,hits=[];let m;while((m=re.exec(t)))hits.push({pair:m[1]+'/'+m[2],idx:m.index,end:re.lastIndex});const ok=(b,a)=>b>0&&a>=b&&a/b<1.05,res=new Map(),failed=[];
  for(let i=0;i<hits.length;i++){const toks=(t.slice(hits[i].end,i+1<hits.length?hits[i+1].idx:t.length).match(/\d+(?:\.\d+)?/g)||[]),n=toks.map(Number);let r=null;
   if(n.length>=3&&n[1]<100&&((toks[1].split('.')[1]||'').length<=1)&&toks[0].includes('.')&&toks[2].includes('.')&&ok(n[0],n[2]))r={bid:n[0],ask:n[2],sp:n[1],bidStr:toks[0],askStr:toks[2]};
@@ -368,10 +417,15 @@ function ocrParse(){const text=$('ocrText').value,re=/^=== 画像\d+（(証拠�
  ocrState={margin,mcount,failed:[...failed],rates:[...rates.values()]};renderOcrPreview()}
 function renderOcrPreview(){const el=$('ocrPreview'),st=ocrState;if(!st||(!st.margin&&!st.rates.length&&!(st.failed&&st.failed.length))){el.innerHTML='<p class="muted">読み取れる項目が見つかりませんでした。画像の範囲・向きを確認するか、テキストを修正して「解析」を押してください。</p>';return}let h='';
  const LB={deposit:'預託証拠金',equity:'有効証拠金',required:'必要証拠金',order:'発注証拠金',floating:'評価損益',available:'発注可能額',withdrawable:'出金可能額',positionPnl:'ポジション損益',unrealizedSwap:'未実現スワップ',alertLevel:'アラート基準額',losscut:'ロスカット基準額',leverage:'レバレッジ'};
- if(st.margin){const w=marginWarnings(st.margin);if(st.mcount!=null&&st.mcount!==17)w.push(`読み取れた行数が${st.mcount}行です（通常17行）`);const okc=w.length===0;h+='<h3 style="margin-top:10px">証拠金</h3>'+(w.length?`<div class="negative" style="font-size:13px">⚠ ${w.join('<br>⚠ ')}<br>数値を直してからチェックを入れて反映してください。</div>`:'<div class="muted">整合性チェック：OK</div>')+Object.keys(LB).map(k=>{const v=st.margin[k];return `<div class="item row"><label style="display:flex;align-items:center;gap:6px;margin:0"><input type="checkbox" ${okc&&v!=null?'checked':''} style="width:auto;min-height:0">${LB[k]}</label><input type="number" step="any" data-ocr-m="${k}" value="${v??''}" style="width:130px;text-align:right"></div>`}).join('')}
+ if(st.margin){const w=marginWarnings(st.margin);if(st.mcount!=null&&st.mcount!==17)w.push(`読み取れた行数が${st.mcount}行です（通常17行）`);const okc=w.length===0;h+='<h3 style="margin-top:10px">証拠金</h3>'+(w.length?`<div class="negative" style="font-size:13px">⚠ ${w.join('<br>⚠ ')}<br>数値を確認・修正してください。不一致がある間は証拠金データを反映できません。</div>`:'<div class="muted">整合性チェック：OK</div>')+Object.keys(LB).map(k=>{const v=st.margin[k];return `<div class="item row"><label style="display:flex;align-items:center;gap:6px;margin:0"><input type="checkbox" ${okc&&v!=null?'checked':''} style="width:auto;min-height:0">${LB[k]}</label><input type="number" step="any" data-ocr-m="${k}" value="${v??''}" style="width:130px;text-align:right"></div>`}).join('')}
  if(st.rates.length||(st.failed&&st.failed.length))h+='<h3 style="margin-top:10px">現在レート（Bid / Ask）</h3>'+st.rates.map(r=>{const c=rateCheck(r),old=bookDirect(r.pair),dev=old?Math.abs((c.bid+c.ask)/2/((old.bid+old.ask)/2)-1):0,bad=dev>0.05||(c.note&&!c.fixed),note=dev>0.05?'既存レートと差が大きい':c.note;return `<div class="item row" data-ocr-r="${esc(r.pair)}"><label style="display:flex;align-items:center;gap:6px;margin:0"><input type="checkbox" ${bad?'':'checked'} style="width:auto;min-height:0"><span><b>${esc(r.pair)}</b>${note?`<br><small class="${bad?'negative':'muted'}">${note}</small>`:''}</span></label><span style="white-space:nowrap"><input type="number" step="any" value="${c.bid}" style="width:92px"> / <input type="number" step="any" value="${c.ask}" style="width:92px"></span></div>`}).join('')+(st.failed&&st.failed.length?`<div class="negative" style="font-size:13px;margin-top:6px">⚠ 読み取れなかった通貨ペア：${st.failed.map(esc).join('、')}（手動レートで入力してください）</div>`:'');
  h+='<button id="ocrApply" style="width:100%;margin-top:10px">チェックした項目を反映</button>';el.innerHTML=h;$('ocrApply').onclick=ocrApply}
-function ocrApply(){if(!ocrState)return;const M={};document.querySelectorAll('[data-ocr-m]').forEach(x=>{const cb=x.parentElement.querySelector('input[type=checkbox]');if(cb&&cb.checked&&x.value!=='')M[x.dataset.ocrM]=Number(x.value)});let nm=0,nr=0;const applied=[];if(Object.keys(M).length){db.margin={...db.margin,...M,asOf:new Date().toLocaleString('ja-JP')};nm=Object.keys(M).length}
+function ocrApply(){if(!ocrState)return;const M={};document.querySelectorAll('[data-ocr-m]').forEach(x=>{const cb=x.parentElement.querySelector('input[type=checkbox]');if(cb&&cb.checked&&x.value!=='')M[x.dataset.ocrM]=Number(x.value)});let nm=0,nr=0;const applied=[];if(Object.keys(M).length){
+ const candidate={...db.margin,...M};
+ const mw=marginWarnings(candidate);
+ if(mw.length){alert('証拠金の整合性が取れていないため反映を中止しました。\\n\\n'+mw.join('\\n')+'\\n\\n数値を修正してから再度お試しください。');return}
+ db.margin={...candidate,asOf:new Date().toLocaleString('ja-JP')};nm=Object.keys(M).length
+}
  document.querySelectorAll('[data-ocr-r]').forEach(row=>{const cb=row.querySelector('input[type=checkbox]'),ins=row.querySelectorAll('input[type=number]'),bid=Number(ins[0].value),ask=Number(ins[1].value);if(cb.checked&&bid>0&&ask>=bid){const pair=row.dataset.ocrR;db.quotes=db.quotes.filter(q=>q.pair!==pair);db.quotes.push({pair,bid,ask,value:(bid+ask)/2,source:'画像取込',updated:new Date().toLocaleString('ja-JP'),ts:Date.now(),manual:true});nr++;applied.push(pair)}});if(applied.length){const rest=sortedQuotes().map(q=>q.pair).filter(p=>!applied.includes(p));db.quoteOrder=[...applied,...rest]}
  $('ocrText').value='';ocrState=null;$('ocrPreview').innerHTML='';$('ocrStatus').textContent=`反映しました：証拠金${nm}項目／レート${nr}ペア`;save()}
 function renderAcct(){const el=$('heroAcct');if(!el)return;const m=db.margin||{},eq=Number(m.equity),rq=Number(m.required),ratio=rq>0&&Number.isFinite(eq)?eq/rq*100:null,pp=m.positionPnl!=null?Number(m.positionPnl):null,us=m.unrealizedSwap!=null?Number(m.unrealizedSwap):null,net=pp!=null&&us!=null?pp+us:null,al=Number(m.alertLevel)>0&&rq>0?Number(m.alertLevel)/rq*100:200,lv=ratio===null?'':ratio>=al?'ok':ratio>=150?'warn':'bad',cell=(l,v)=>`<div class="k"><small>${l}</small><b class="${v!=null&&v<0?'neg':''}">${v==null?'—':money(v)}</b></div>`;
